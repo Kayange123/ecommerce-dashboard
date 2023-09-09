@@ -1,7 +1,6 @@
 import { ModalProvider } from '@/providers/modal-provider';
 import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from 'next'
-import { Analytics } from '@vercel/analytics/react';
 import { Inter } from 'next/font/google';
 import ToastProvider from '@/providers/toast-provider';
 
@@ -23,7 +22,6 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={inter.className}>
-          <Analytics />
           <ToastProvider />
           <ModalProvider />
           {children}

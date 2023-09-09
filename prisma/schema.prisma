@@ -20,6 +20,7 @@ model Store {
   sizes Size[]
   billboards Billboard[]
   categories Category[]
+  products Product[] 
 }
 
 model Billboard {
@@ -40,9 +41,12 @@ model Category {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   billboardId String @db.String()
+
+  products Product[]
   
   billboard Billboard @relation(fields: [billboardId], references: [id])
   store Store @relation(fields: [storeId], references: [id])
+  
 }
 
 model Size {
@@ -52,5 +56,33 @@ model Size {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   value String
+
+  products Product[]
   store Store @relation(fields: [storeId], references: [id])
+}
+
+model Product {
+  id String @id @default(uuid()) @map("_id") @db.String
+  storeId String @db.String 
+  categoryId String @db.String()
+  name String
+  price Float
+  isFeatured Boolean @default(false)
+  isArchived Boolean @default(false)
+  sizeId String @db.String()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productImages Image[]
+  size Size @relation(fields: [sizeId], references: [id])
+  store Store @relation(fields: [storeId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+}
+
+model Image {
+  id String @id @default(uuid()) @map("_id") @db.String
+  productId String @db.String()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
