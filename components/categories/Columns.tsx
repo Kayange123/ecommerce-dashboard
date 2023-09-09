@@ -10,16 +10,22 @@ import { useState } from "react";
 import axios from "axios";
 import AlertModal from "../modals/alertModal";
 
-export type BillboardColumn = {
+export type CategoryColumn = {
     id: string;
-    label: string;
+    name: string;
+    billboardLabel: string;
     createdAt: string;
 }
 
-export const Columns: ColumnDef<BillboardColumn>[] = [
+export const Columns: ColumnDef<CategoryColumn>[] = [
     {
-        accessorKey: "label",
-        header: "Label",
+        accessorKey: "name",
+        header: "Name",
+    },
+    {
+        accessorKey: "billboard",
+        header: "Billboard",
+        cell: ({row})=>row.original.billboardLabel
     },
     {
         accessorKey: "createdAt",
@@ -33,9 +39,7 @@ export const Columns: ColumnDef<BillboardColumn>[] = [
 ] 
 
 interface ICellAction {
-    data: BillboardColumn
-
-
+    data: CategoryColumn;
 }
 
 export const CellAction = ({data}: ICellAction)=>{
@@ -45,17 +49,17 @@ export const CellAction = ({data}: ICellAction)=>{
     const params = useParams();
     const onCopy = (text: string) => {
         navigator.clipboard.writeText(text);
-        toast.success("Billboard ID copied.");
+        toast.success("Category ID copied to clipboard.");
     }
 
     const onDelete = async () => {
         try {
           setIsLoading(true);
-          await axios.delete(`/api/${params.storeId}/billboards/${data.id}`);
+          await axios.delete(`/api/${params.storeId}/categories/${data.id}`);
           router.refresh();
-          toast.success("billboard deleted!");
+          toast.success("category deleted!");
         } catch (error) {
-          toast.error("You can't delete billboard with categories and products");
+          toast.error("You can't delete category containing products");
         } finally {
           setIsLoading(false);
           setIsOpen(false);
@@ -75,7 +79,7 @@ export const CellAction = ({data}: ICellAction)=>{
                 <DropdownMenuLabel>
                     actions
                 </DropdownMenuLabel>
-                <DropdownMenuItem onClick={()=>router.push(`/${params.storeId}/billboards/${data.id}`)} className="cursor-pointer">
+                <DropdownMenuItem onClick={()=>router.push(`/${params.storeId}/categories/${data.id}`)} className="cursor-pointer">
                     <Edit className="mr-2 h-4 w-4" />
                     Update
                 </DropdownMenuItem>
