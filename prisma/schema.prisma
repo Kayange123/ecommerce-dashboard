@@ -17,6 +17,7 @@ model Store {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  orders Order[]
   sizes Size[]
   billboards Billboard[]
   categories Category[]
@@ -73,6 +74,7 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  orderItems OrderItem[]
   images Image[]
   size Size @relation(fields: [sizeId], references: [id])
   store Store @relation(fields: [storeId], references: [id])
@@ -86,4 +88,25 @@ model Image {
   url String
   updatedAt DateTime @updatedAt
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id String @id @default(uuid()) @map("_id") @db.String
+  storeId String @db.String()
+  isPaid Boolean @default(false)
+  phone String @default("")
+  address String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orderItems OrderItem[]
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+}
+
+model OrderItem {
+  id String @id @default(uuid()) @map("_id") @db.String
+  orderId String @db.String()
+  productId String @db.String()
+
+  product Product @relation(fields: [productId], references: [id])
+  order Order @relation(fields: [orderId], references: [id])
 }
