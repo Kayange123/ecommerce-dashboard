@@ -1,12 +1,12 @@
 import { ModalProvider } from '@/providers/modal-provider';
 import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google';
+import {  Poppins } from 'next/font/google';
 import ToastProvider from '@/providers/toast-provider';
 
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const poppins = Poppins({ weight: "500", style: "normal", subsets: ["latin"]});
 
 export const metadata: Metadata = {
   title: 'Home - Admin Dashboard',
@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={inter.className}>
+        <body className={poppins.className}>
           <ToastProvider />
           <ModalProvider />
           {children}
