@@ -22,6 +22,7 @@ export async function POST(
   if (!productIds || productIds.length === 0) {
     return new NextResponse("ProductIds are required", { status: 400 });
   }
+
   const products = await prismadb.product.findMany({
     where: {
       id: {
@@ -43,7 +44,11 @@ export async function POST(
           name: item.name,
           images: item.images.map((image) => image.url),
         },
-        unit_amount: item.price,
+        unit_amount: Number(item.price) * 100,
+      },
+      adjustable_quantity: {
+        enabled: true,
+        minimum: 1,
       },
     });
   });
@@ -64,19 +69,26 @@ export async function POST(
     },
   });
 
-  const session = await stripe.checkout.sessions.create({
-    line_items,
-    mode: "payment",
-    billing_address_collection: "required",
-    phone_number_collection: {
-      enabled: true,
-    },
-    cancel_url: `${process.env.NEXT_PUBLIC_STORE_URL}/cart/canceled=1`,
-    success_url: `${process.env.NEXT_PUBLIC_STORE_URL}/cart/success=1`,
-    metadata: {
-      orderId: order.id,
-    },
-  });
-
-  return NextResponse.json({ url: session.url }, { headers: corsHeaders });
+  try {
+    const session = await stripe.checkout.sessions.create({
+      line_items,
+      mode: "payment",
+      submit_type: "pay",
+      billing_address_collection: "required",
+      phone_number_collection: {
+        enabled: true,
+      },
+      cancel_url: `${process.env.NEXT_PUBLIC_STORE_URL}/cart?canceled=1`,
+      success_url: `${process.env.NEXT_PUBLIC_STORE_URL}/cart?success=1`,
+      metadata: {
+        orderId: order.id,
+      },
+    });
+    return NextResponse.json({ url: session.url }, { headers: corsHeaders });
+  } catch (error) {
+    return new NextResponse("Failed to create create a payment", {
+      status: 500,
+      statusText: "server error",
+    });
+  }
 }
