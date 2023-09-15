@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,7 +24,13 @@ import { useParams, useRouter } from "next/navigation";
 import AlertModal from "./modals/alertModal";
 import ImageUpload from "./ui/ImageUpload";
 import { Billboard, Category } from "@prisma/client";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 interface CategoryFormProps {
   initialData: Category | null;
@@ -39,7 +46,7 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
   const title = initialData ? "Edit Category" : "Create Category";
   const description = initialData
     ? "Edit a Category"
-    : "Create a new Category";
+    : "Create a new Category for your billboard";
   const action = initialData ? "save changes" : "Create";
   const toastMessage = initialData ? "Changes saved" : "Category Created";
 
@@ -59,23 +66,28 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
     try {
       setIsLoading(true);
       if (initialData) {
-        await axios.patch(`/api/${params?.storeId}/categories/${params?.categoryId}`, data);
+        await axios.patch(
+          `/api/${params?.storeId}/categories/${params?.categoryId}`,
+          data
+        );
       } else {
         await axios.post(`/api/${params.storeId}/categories`, data);
       }
       router.refresh();
-      router.push(`/${params.storeId}/categories`)
+      router.push(`/${params.storeId}/categories`);
       toast.success(toastMessage);
     } catch (error) {
       toast.error("Failed to to save settings");
     } finally {
       setIsLoading(false);
-    } 
+    }
   };
   const onDelete = async () => {
     try {
       setIsLoading(true);
-      await axios.delete(`/api/${params.storeId}/categories/${params.categoryId}`);
+      await axios.delete(
+        `/api/${params.storeId}/categories/${params.categoryId}`
+      );
       router.refresh();
       router.push(`/${params.storeId}/categories`);
       toast.success("category deleted!");
@@ -113,13 +125,16 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
           className="space-y-8 w-full"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 gap-8">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
+                  <FormDescription>
+                    Label describing your category
+                  </FormDescription>
                   <FormControl>
                     <Input
                       disabled={isLoading}
@@ -137,7 +152,15 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Bollboard ID</FormLabel>
-                  <Select disabled={isLoading} onValueChange={field.onChange} value={field.value} defaultValue={field.value} >
+                  <FormDescription>
+                    A category belongs to billboards
+                  </FormDescription>
+                  <Select
+                    disabled={isLoading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
@@ -148,7 +171,9 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
                     </FormControl>
                     <SelectContent>
                       {billboards.map((billboard) => (
-                        <SelectItem value={billboard.id} key={billboard.id}>{billboard.label}</SelectItem>
+                        <SelectItem value={billboard.id} key={billboard.id}>
+                          {billboard.label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -162,7 +187,6 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
           </Button>
         </form>
       </Form>
-      <Separator />
     </>
   );
 };
