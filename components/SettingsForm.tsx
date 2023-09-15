@@ -25,7 +25,6 @@ import AlertModal from "./modals/alertModal";
 import ApiAlert from "./ui/api-alert";
 import { useOrigin } from "@/hooks/useOrigin";
 
-
 interface SettingsFormProps {
   initialData: Store;
 }
@@ -35,8 +34,7 @@ const formSchema = z.object({
 type SettingsFormValues = z.infer<typeof formSchema>;
 
 const SettingsForm = ({ initialData }: SettingsFormProps) => {
-
-    const origin = useOrigin();
+  const origin = useOrigin();
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const params = useParams();
@@ -100,7 +98,7 @@ const SettingsForm = ({ initialData }: SettingsFormProps) => {
           className="space-y-8 w-full"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-3 gap-8">
             <FormField
               control={form.control}
               name="name"

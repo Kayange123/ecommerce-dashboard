@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { z } from "zod";
-import {  Size } from "@prisma/client";
+import { Size } from "@prisma/client";
 import Heading from "@/components/ui/Heading";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
@@ -34,9 +34,7 @@ type SizeFormValues = z.infer<typeof formSchema>;
 
 const SizeForm = ({ initialData }: SizeFormProps) => {
   const title = initialData ? "Edit size" : "Create size";
-  const description = initialData
-    ? "Edit a Size"
-    : "Create a new size";
+  const description = initialData ? "Edit a Size" : "Create a new size";
   const action = initialData ? "save changes" : "Create";
   const toastMessage = initialData ? "Changes saved" : "size Created";
 
@@ -56,18 +54,21 @@ const SizeForm = ({ initialData }: SizeFormProps) => {
     try {
       setIsLoading(true);
       if (initialData) {
-        await axios.patch(`/api/${params?.storeId}/sizes/${params?.sizeId}`, data);
+        await axios.patch(
+          `/api/${params?.storeId}/sizes/${params?.sizeId}`,
+          data
+        );
       } else {
         await axios.post(`/api/${params.storeId}/sizes`, data);
       }
       router.refresh();
-      router.push(`/${params.storeId}/sizes`)
+      router.push(`/${params.storeId}/sizes`);
       toast.success(toastMessage);
     } catch (error) {
       toast.error("Failed to to save settings");
     } finally {
       setIsLoading(false);
-    } 
+    }
   };
   const onDelete = async () => {
     try {
@@ -110,7 +111,7 @@ const SizeForm = ({ initialData }: SizeFormProps) => {
           className="space-y-8 w-full"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-3 gap-8">
             <FormField
               control={form.control}
               name="name"
@@ -120,7 +121,7 @@ const SizeForm = ({ initialData }: SizeFormProps) => {
                   <FormControl>
                     <Input
                       disabled={isLoading}
-                      placeholder="Size name"
+                      placeholder="E.g Large"
                       {...field}
                     />
                   </FormControl>
@@ -137,7 +138,7 @@ const SizeForm = ({ initialData }: SizeFormProps) => {
                   <FormControl>
                     <Input
                       disabled={isLoading}
-                      placeholder="Size value"
+                      placeholder="E.g XXL"
                       {...field}
                     />
                   </FormControl>

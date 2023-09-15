@@ -57,23 +57,28 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
     try {
       setIsLoading(true);
       if (initialData) {
-        await axios.patch(`/api/${params?.storeId}/billboards/${params?.billboardId}`, data);
+        await axios.patch(
+          `/api/${params?.storeId}/billboards/${params?.billboardId}`,
+          data
+        );
       } else {
         await axios.post(`/api/${params.storeId}/billboards`, data);
       }
       router.refresh();
-      router.push(`/${params.storeId}/billboards`)
+      router.push(`/${params.storeId}/billboards`);
       toast.success(toastMessage);
     } catch (error) {
       toast.error("Failed to to save settings");
     } finally {
       setIsLoading(false);
-    } 
+    }
   };
   const onDelete = async () => {
     try {
       setIsLoading(true);
-      await axios.delete(`/api/${params.storeId}/billboards/${params.billboardId}`);
+      await axios.delete(
+        `/api/${params.storeId}/billboards/${params.billboardId}`
+      );
       router.refresh();
       router.push(`/${params.storeId}/billboards`);
       toast.success("billboard deleted!");
@@ -129,7 +134,7 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
               </FormItem>
             )}
           />
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-3 gap-8">
             <FormField
               control={form.control}
               name="label"
@@ -153,7 +158,6 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
           </Button>
         </form>
       </Form>
-      <Separator />
     </>
   );
 };

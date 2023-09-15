@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { z } from "zod";
-import {  Category, Image, Product, Size } from "@prisma/client";
+import { Category, Image, Product, Size } from "@prisma/client";
 import Heading from "@/components/ui/Heading";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
@@ -24,16 +24,23 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import AlertModal from "./modals/alertModal";
 import ImageUpload from "./ui/ImageUpload";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { Checkbox } from "./ui/checkbox";
 
 interface ProductFormProps {
   categories: Category[];
   sizes: Size[];
-  initialData: Product &
-   { 
-    images: Image[]; 
-  } | null;
+  initialData:
+    | (Product & {
+        images: Image[];
+      })
+    | null;
 }
 const formSchema = z.object({
   name: z.string().min(1),
@@ -42,15 +49,17 @@ const formSchema = z.object({
   categoryId: z.string(),
   sizeId: z.string(),
   isFeatured: z.boolean().default(false),
-  isArchived: z.boolean().default(false)
+  isArchived: z.boolean().default(false),
 });
 type ProductFormValues = z.infer<typeof formSchema>;
 
-const ProductForm = ({ initialData, sizes, categories =[] }: ProductFormProps) => {
+const ProductForm = ({
+  initialData,
+  sizes,
+  categories = [],
+}: ProductFormProps) => {
   const title = initialData ? "Edit product" : "Create product";
-  const description = initialData
-    ? "Edit a product"
-    : "Create a new product";
+  const description = initialData ? "Edit a product" : "Create a new product";
   const action = initialData ? "save changes" : "Create";
   const toastMessage = initialData ? "Changes saved" : "Product Created";
 
@@ -68,26 +77,29 @@ const ProductForm = ({ initialData, sizes, categories =[] }: ProductFormProps) =
       categoryId: "",
       sizeId: "",
       isFeatured: false,
-      isArchived: false
-    }
+      isArchived: false,
+    },
   });
 
   const onSubmit = async (data: ProductFormValues) => {
     try {
       setIsLoading(true);
       if (initialData) {
-        await axios.patch(`/api/${params?.storeId}/products/${params?.productId}`, data);
+        await axios.patch(
+          `/api/${params?.storeId}/products/${params?.productId}`,
+          data
+        );
       } else {
         await axios.post(`/api/${params.storeId}/products`, data);
       }
       router.refresh();
-      router.push(`/${params.storeId}/products`)
+      router.push(`/${params.storeId}/products`);
       toast.success(toastMessage);
     } catch (error) {
       toast.error("Failed to to save product");
     } finally {
       setIsLoading(false);
-    } 
+    }
   };
   const onDelete = async () => {
     try {
@@ -140,15 +152,21 @@ const ProductForm = ({ initialData, sizes, categories =[] }: ProductFormProps) =
                   <ImageUpload
                     values={field.value?.map((image) => image.url)}
                     disabled={isLoading}
-                    onChange={(url) => field.onChange([...field.value, {url}])}
-                    onRemove={(url) => field.onChange([...field.value.filter((item)=> item.url !== url)])}
+                    onChange={(url) =>
+                      field.onChange([...field.value, { url }])
+                    }
+                    onRemove={(url) =>
+                      field.onChange([
+                        ...field.value.filter((item) => item.url !== url),
+                      ])
+                    }
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-3 gap-8">
             <FormField
               control={form.control}
               name="name"
@@ -173,11 +191,7 @@ const ProductForm = ({ initialData, sizes, categories =[] }: ProductFormProps) =
                 <FormItem>
                   <FormLabel>Price</FormLabel>
                   <FormControl>
-                    <Input
-                      disabled={isLoading}
-                      placeholder="10.2"
-                      {...field}
-                    />
+                    <Input disabled={isLoading} placeholder="10.2" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -189,7 +203,12 @@ const ProductForm = ({ initialData, sizes, categories =[] }: ProductFormProps) =
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select disabled={isLoading} onValueChange={field.onChange} value={field.value} defaultValue={field.value} >
+                  <Select
+                    disabled={isLoading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
@@ -200,7 +219,9 @@ const ProductForm = ({ initialData, sizes, categories =[] }: ProductFormProps) =
                     </FormControl>
                     <SelectContent>
                       {categories.map((category) => (
-                        <SelectItem value={category.id} key={category.id}>{category.name}</SelectItem>
+                        <SelectItem value={category.id} key={category.id}>
+                          {category.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -214,7 +235,12 @@ const ProductForm = ({ initialData, sizes, categories =[] }: ProductFormProps) =
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sizes</FormLabel>
-                  <Select disabled={isLoading} onValueChange={field.onChange} value={field.value} defaultValue={field.value} >
+                  <Select
+                    disabled={isLoading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
@@ -225,7 +251,9 @@ const ProductForm = ({ initialData, sizes, categories =[] }: ProductFormProps) =
                     </FormControl>
                     <SelectContent>
                       {sizes.map((size) => (
-                        <SelectItem value={size.id} key={size.id}>{size.name}</SelectItem>
+                        <SelectItem value={size.id} key={size.id}>
+                          {size.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -239,11 +267,7 @@ const ProductForm = ({ initialData, sizes, categories =[] }: ProductFormProps) =
               render={({ field }) => (
                 <FormItem className="flex items-start flex-row space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
-                    disabled={field.value}
-                    onCheckedChange={field.onChange}
-
-                    />
+                    <Checkbox onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Featured</FormLabel>
@@ -260,11 +284,7 @@ const ProductForm = ({ initialData, sizes, categories =[] }: ProductFormProps) =
               render={({ field }) => (
                 <FormItem className="flex items-start flex-row space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
-                    <Checkbox
-                    disabled={field.value}
-                    onCheckedChange={field.onChange}
-
-                    />
+                    <Checkbox onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Archived</FormLabel>
@@ -281,7 +301,6 @@ const ProductForm = ({ initialData, sizes, categories =[] }: ProductFormProps) =
           </Button>
         </form>
       </Form>
-      <Separator />
     </>
   );
 };
