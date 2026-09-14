@@ -67,6 +67,21 @@ export async function POST(req: Request) {
       },
     });
 
+    // Backfill each OrderItem's final quantity now that checkout is
+    // complete — adjustable_quantity means the customer could have
+    // changed it in Stripe's UI after the order/line-items were created.
+    // Joined via stripeLineItemId (set at checkout-creation time), not
+    // by re-deriving from what was originally requested.
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+    await Promise.all(
+      lineItems.data.map((lineItem) =>
+        prismadb.orderItem.updateMany({
+          where: { orderId: order.id, stripeLineItemId: lineItem.id },
+          data: { quantity: lineItem.quantity ?? 1 },
+        })
+      )
+    );
+
     // Recorded after the side effects above succeed, not before: both
     // side effects are idempotent set-to-a-fixed-value writes, so a crash
     // between them and this insert just costs one harmless extra retry,

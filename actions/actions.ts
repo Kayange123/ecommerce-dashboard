@@ -22,7 +22,7 @@ export const getTotalRevenue = async (storeId: string) => {
 
   const totalRevenue = paidOrders.reduce((total, order) => {
     const orderTotal = order.orderItems.reduce((orderSum, item) => {
-      return orderSum + item.product.price;
+      return orderSum + item.product.price * item.quantity;
     }, 0);
     return orderTotal + total;
   }, 0);
@@ -68,7 +68,7 @@ export const getGraphRevenue = async (storeId: string) => {
     let revenueForOrder = 0;
 
     for (const item of order.orderItems) {
-      revenueForOrder += item.product.price;
+      revenueForOrder += item.product.price * item.quantity;
     }
     monthlyOrder[month] = (monthlyOrder[month] || 0) + revenueForOrder;
   }

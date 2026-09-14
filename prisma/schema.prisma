@@ -102,9 +102,16 @@ model Order {
 }
 
 model OrderItem {
-  id        String @id @default(uuid()) @map("_id") @db.String
-  orderId   String @db.String()
-  productId String @db.String()
+  id               String  @id @default(uuid()) @map("_id") @db.String
+  orderId          String  @db.String()
+  productId        String  @db.String()
+  // Defaults to 1 for backward compatibility with existing rows created
+  // before quantity tracking existed. See docs/architecture/commerce-domain.md.
+  quantity         Int     @default(1)
+  // Stripe's own line item id, used as a stable join key to backfill the
+  // final quantity from the webhook once checkout completes — see
+  // app/api/[storeId]/checkout/route.ts and app/api/webhook/route.ts.
+  stripeLineItemId String? @db.String()
 
   product Product @relation(fields: [productId], references: [id])
   order   Order   @relation(fields: [orderId], references: [id])

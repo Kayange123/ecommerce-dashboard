@@ -43,9 +43,11 @@ describe("cross-store authorization: checkout", () => {
       },
     ]);
     fakeDb.order = createFakeTable([]);
+    fakeDb.orderItem = createFakeTable([]);
     fakeStripe.checkout.sessions.create.mockReset();
     fakeStripe.checkout.sessions.create.mockResolvedValue({
       url: "https://stripe.example/session",
+      line_items: { data: [{ id: "li_test_1" }] },
     });
   });
 
@@ -78,5 +80,21 @@ describe("cross-store authorization: checkout", () => {
     expect(fakeStripe.checkout.sessions.create).toHaveBeenCalledTimes(1);
     const call = fakeStripe.checkout.sessions.create.mock.calls[0][0];
     expect(call.line_items).toHaveLength(1);
+    expect(call.expand).toContain("line_items");
+  });
+
+  it("backfills each order item's Stripe line item id from the created session", async () => {
+    expect(fakeDb.order.rows()).toHaveLength(0); // sanity: table starts empty
+
+    const updateManySpy = vi.spyOn(fakeDb.orderItem, "updateMany");
+
+    await POST(checkoutRequest(["product-a1"]), {
+      params: { storeId: "store-a" },
+    });
+
+    expect(updateManySpy).toHaveBeenCalledWith({
+      where: { orderId: fakeDb.order.rows()[0].id, productId: "product-a1" },
+      data: { stripeLineItemId: "li_test_1" },
+    });
   });
 });

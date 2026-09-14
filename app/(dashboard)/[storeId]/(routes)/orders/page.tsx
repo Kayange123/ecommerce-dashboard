@@ -27,10 +27,14 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
     address: order.address,
     isPaid: order.isPaid,
     products: order.orderItems
-      .map((orderItem) => orderItem.product.name)
+      .map((orderItem) =>
+        orderItem.quantity > 1
+          ? `${orderItem.product.name} x${orderItem.quantity}`
+          : orderItem.product.name
+      )
       .join(", "),
     totalPrice: order.orderItems.reduce(
-      (acc, orderItem) => acc + orderItem.product.price,
+      (acc, orderItem) => acc + orderItem.product.price * orderItem.quantity,
       0
     ),
     createdAt: format(order.createdAt, "MMMM do, yyyy"),

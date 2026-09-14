@@ -60,6 +60,11 @@ export function createFakeTable(initialRows: Row[] = []) {
     findMany: async ({ where }: { where?: Row } = {}) => {
       return where ? rows.filter((row) => matches(row, where)) : [...rows];
     },
+    count: async ({ where }: { where?: Row } = {}) => {
+      return where
+        ? rows.filter((row) => matches(row, where)).length
+        : rows.length;
+    },
     update: async ({ where, data }: { where: Row; data: Row }) => {
       const row = rows.find((r) => matches(r, where));
       if (!row) {

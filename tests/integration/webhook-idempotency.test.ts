@@ -7,6 +7,11 @@ const { fakeDb, fakeStripe } = vi.hoisted(() => ({
     webhooks: {
       constructEvent: vi.fn(),
     },
+    checkout: {
+      sessions: {
+        listLineItems: vi.fn(),
+      },
+    },
   },
 }));
 
@@ -28,6 +33,7 @@ const EVENT = {
   type: "checkout.session.completed",
   data: {
     object: {
+      id: "cs_test_1",
       metadata: { orderId: "order-1" },
       customer_details: { address: {}, phone: "" },
     },
@@ -47,6 +53,22 @@ function seedOrderAndProducts() {
     { id: "product-1", storeId: "store-a", isArchived: false },
     { id: "product-2", storeId: "store-a", isArchived: false },
   ]);
+  fakeDb.orderItem = createFakeTable([
+    {
+      id: "oi-1",
+      orderId: "order-1",
+      productId: "product-1",
+      quantity: 1,
+      stripeLineItemId: "li_1",
+    },
+    {
+      id: "oi-2",
+      orderId: "order-1",
+      productId: "product-2",
+      quantity: 1,
+      stripeLineItemId: "li_2",
+    },
+  ]);
 }
 
 describe("webhook idempotency", () => {
@@ -55,6 +77,13 @@ describe("webhook idempotency", () => {
     fakeDb.processedWebhookEvent = createFakeTable([]);
     fakeStripe.webhooks.constructEvent.mockReset();
     fakeStripe.webhooks.constructEvent.mockReturnValue(EVENT);
+    fakeStripe.checkout.sessions.listLineItems.mockReset();
+    fakeStripe.checkout.sessions.listLineItems.mockResolvedValue({
+      data: [
+        { id: "li_1", quantity: 3 },
+        { id: "li_2", quantity: 1 },
+      ],
+    });
   });
 
   it("marks the order paid and archives its products on first delivery", async () => {
@@ -67,6 +96,19 @@ describe("webhook idempotency", () => {
     expect(products.every((p: any) => p.isArchived)).toBe(true);
     expect(fakeDb.processedWebhookEvent.rows()).toHaveLength(1);
     expect(fakeDb.processedWebhookEvent.rows()[0].id).toBe(EVENT.id);
+  });
+
+  it("backfills the final quantity per order item from Stripe's line items", async () => {
+    await POST(webhookRequest());
+
+    const item1 = await fakeDb.orderItem.findFirst({
+      where: { id: "oi-1" },
+    });
+    const item2 = await fakeDb.orderItem.findFirst({
+      where: { id: "oi-2" },
+    });
+    expect(item1.quantity).toBe(3); // customer bumped quantity in Stripe's UI
+    expect(item2.quantity).toBe(1);
   });
 
   it("does not reprocess a retried delivery of the same event", async () => {

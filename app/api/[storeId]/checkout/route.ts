@@ -91,7 +91,26 @@ export async function POST(
       metadata: {
         orderId: order.id,
       },
+      expand: ["line_items"],
     });
+
+    // Stripe preserves the order line items were submitted in, so
+    // `returnedLineItems[i]` corresponds to `products[i]` (and therefore
+    // to `line_items[i]` above). Recording each line item's own id lets
+    // the webhook later look up the *final* quantity (which the customer
+    // can still change in Stripe's Checkout UI, since adjustable_quantity
+    // is enabled) via a stable join key, instead of guessing from what
+    // was requested at checkout-creation time.
+    const returnedLineItems = session.line_items?.data ?? [];
+    await Promise.all(
+      products.map((product, i) =>
+        prismadb.orderItem.updateMany({
+          where: { orderId: order.id, productId: product.id },
+          data: { stripeLineItemId: returnedLineItems[i]?.id },
+        })
+      )
+    );
+
     return NextResponse.json({ url: session.url }, { headers: corsHeaders });
   } catch (error) {
     return new NextResponse("Failed to create create a payment", {
