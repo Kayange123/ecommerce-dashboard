@@ -8,10 +8,34 @@
  */
 type Row = Record<string, any>;
 
+function matchesValue(actual: unknown, expected: unknown): boolean {
+  if (
+    expected !== null &&
+    typeof expected === "object" &&
+    !Array.isArray(expected)
+  ) {
+    const ops = expected as Record<string, unknown>;
+    if ("in" in ops) return (ops.in as unknown[]).includes(actual);
+    if ("startsWith" in ops) {
+      return (
+        typeof actual === "string" &&
+        actual.startsWith(ops.startsWith as string)
+      );
+    }
+    // Unsupported operator — fail loudly rather than silently matching
+    // everything, so a missing case here is caught by a failing test
+    // instead of a false positive.
+    throw new Error(
+      `fakePrisma: unsupported where operator ${JSON.stringify(expected)}`
+    );
+  }
+  return actual === expected;
+}
+
 function matches(row: Row, where: Row): boolean {
   return Object.entries(where).every(([key, value]) => {
     if (value === undefined) return true;
-    return row[key] === value;
+    return matchesValue(row[key], value);
   });
 }
 

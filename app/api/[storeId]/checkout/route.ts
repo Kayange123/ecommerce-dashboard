@@ -28,11 +28,19 @@ export async function POST(
       id: {
         in: productIds,
       },
+      storeId: params.storeId,
     },
     include: {
       images: true,
     },
   });
+
+  if (products.length !== new Set(productIds).size) {
+    return new NextResponse(
+      "One or more products do not belong to this store",
+      { status: 400 }
+    );
+  }
 
   const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
   products.forEach((item) => {
@@ -58,10 +66,10 @@ export async function POST(
       storeId: params.storeId,
       isPaid: false,
       orderItems: {
-        create: productIds.map((productId: string) => ({
+        create: products.map((product) => ({
           product: {
             connect: {
-              id: productId,
+              id: product.id,
             },
           },
         })),
