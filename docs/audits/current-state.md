@@ -6,6 +6,8 @@
 
 **Baseline result:** `npm install` succeeds (525 packages, 30 audit findings — see [Dependency risks](#dependency-risks)). `npx tsc --noEmit` passes with zero errors. `npm run build` succeeds and emits 27 routes. **The app currently builds and typechecks cleanly.** Any regression introduced during modernization is a real regression, not a pre-existing break — there is no "already broken" excuse available.
 
+**Status update (post-audit):** this document is a point-in-time snapshot and is intentionally left unedited below — see [CHANGELOG.md](../../CHANGELOG.md) for what has since shipped. Two findings from this audit are already fixed as of the commits following it: the §6 cross-store IDOR (fixed, with regression tests in `tests/integration/*-authorization.test.ts` — see [docs/architecture/authorization.md](../architecture/authorization.md)) and the §5 duplicate Tailwind config (the unused `tailwind.config.ts` stub was removed). Everything else below — including the webhook idempotency gap, the missing `OrderItem` quantity, and the checkout tenant-scoping gap — is still open.
+
 ---
 
 ## 1. Current architecture

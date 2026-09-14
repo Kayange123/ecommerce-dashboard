@@ -18,7 +18,10 @@ RUN npm run build
 FROM base AS runner
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm ci --omit=dev
+# --ignore-scripts: `postinstall` runs `prisma generate`, but the `prisma`
+# CLI is a devDependency, so it's unavailable under --omit=dev. The
+# generated client is copied from the build stage below instead.
+RUN npm ci --omit=dev --ignore-scripts
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 RUN chown -R node:node /app

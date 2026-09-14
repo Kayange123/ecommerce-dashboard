@@ -88,9 +88,12 @@ required"`) and inconsistent in casing/punctuation across resources.
 16. **Add integration tests for the `stores` API** — `app/api/stores/**`
     has no test coverage yet, unlike the four resources covered in
     `tests/integration/*-authorization.test.ts`.
-17. **Write the first Playwright e2e smoke test**: sign up → create store
-    → create category → create product → view product. Scaffold exists
-    (`test:e2e` script) but no test has been written yet.
+17. **Write the authenticated Playwright e2e journey**: sign up → create
+    store → create category → create product → view product → create/
+    order fixture → view order. A config and one unauthenticated smoke
+    test already exist (`playwright.config.ts`, `tests/e2e/auth.spec.ts`)
+    — this needs Clerk's testing-token support (`@clerk/testing`) and a
+    configured Clerk test instance to drive a real signed-in session.
 18. **Add a webhook idempotency test** once event-id dedupe is
     implemented (pairs with issue #20 below) — assert a replayed
     `checkout.session.completed` event doesn't double-archive products.

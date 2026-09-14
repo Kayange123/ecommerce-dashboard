@@ -1,8 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * A real, currently-runnable smoke test: verifies the authentication
- * boundary from middleware.ts without needing Clerk test credentials.
+ * Verifies the authentication boundary from middleware.ts, without needing
+ * Clerk test credentials for the assertion itself. It still needs a real
+ * `.env` (valid-format Clerk keys at minimum) for `npm run dev` to boot at
+ * all — this is not yet exercised by CI, only runnable locally with a
+ * populated environment.
  *
  * The full authenticated journey (login → create store → create category
  * → create product → view product → create order → view order) needs a
