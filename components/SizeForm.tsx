@@ -108,10 +108,10 @@ const SizeForm = ({ initialData }: SizeFormProps) => {
       <Separator />
       <Form {...form}>
         <form
-          className="space-y-8 w-full"
+          className="w-full space-y-8"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          <div className="grid sm:grid-cols-3 gap-8">
+          <div className="grid gap-8 sm:grid-cols-3">
             <FormField
               control={form.control}
               name="name"

@@ -1,0 +1,34 @@
+name: Integration request
+description: Propose a new payment/storage/email/search provider integration.
+labels: ["integration"]
+body:
+  - type: input
+    id: provider
+    attributes:
+      label: Provider name
+      placeholder: e.g. PayPal, M-Pesa, S3, SendGrid
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Integration category
+      options:
+        - Payment provider
+        - Storage provider
+        - Email provider
+        - Search provider
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: |
+        Payment/storage provider integrations depend on the provider
+        interfaces landing first (see docs/architecture/integrations.md
+        and ROADMAP.md v0.4). If that hasn't shipped yet, this issue will
+        be tracked but likely blocked until then.
+    validations:
+      required: false

@@ -1,0 +1,46 @@
+name: ecommerce-dashboard
+
+services:
+  # MongoDB, configured as a single-node replica set. Prisma requires a
+  # replica set to support transactions and nested writes, even for a
+  # single local node — a plain `mongo` container without --replSet will
+  # fail on `npm run db:seed` and on any nested Prisma write.
+  mongodb:
+    image: mongo:7
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: >
+        mongosh --quiet --eval
+        "try { rs.status().ok } catch (e) { 0 }"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # One-shot job that initializes the replica set on first boot, then exits.
+  # Safe to re-run: if the replica set already exists, rs.initiate() fails
+  # harmlessly and this container just exits non-zero, which compose ignores
+  # since it has no dependents.
+  mongodb-init:
+    image: mongo:7
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: "no"
+    entrypoint:
+      - mongosh
+      - --host
+      - mongodb
+      - --eval
+      - >
+        try {
+          rs.status();
+        } catch (e) {
+          rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "mongodb:27017" }] });
+        }
+
+volumes:
+  mongo_data:

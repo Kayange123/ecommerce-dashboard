@@ -33,7 +33,7 @@ Admin Dashboard (Next.js App Router, React 18, Tailwind, Radix/shadcn-derived UI
    webhook)         next-cloudinary)
 ```
 
-- **Auth:** Clerk (`@clerk/nextjs` v4, legacy `authMiddleware` API). `middleware.ts` marks `/api/:path*` as a Clerk *public route* — Clerk performs no enforcement on API routes at all. Every route handler calls `auth()` itself and hand-checks `userId`. This is the single biggest architectural fact in the repo: **there is no centralized authorization layer**; correctness depends on every handler remembering to re-derive it.
+- **Auth:** Clerk (`@clerk/nextjs` v4, legacy `authMiddleware` API). `middleware.ts` marks `/api/:path*` as a Clerk _public route_ — Clerk performs no enforcement on API routes at all. Every route handler calls `auth()` itself and hand-checks `userId`. This is the single biggest architectural fact in the repo: **there is no centralized authorization layer**; correctness depends on every handler remembering to re-derive it.
 - **Multi-tenancy today:** one dimension only — `Store.userId` is a raw Clerk user id. There is no organization/team concept; a store has exactly one owner, full stop.
 - **Data layer:** Prisma 5 against MongoDB. Every model uses `@map("_id") @db.String` with app-generated UUIDs (not native `ObjectId`) — a deliberate-looking choice, probably to keep IDs portable, but it forgoes Mongo's native id indexing.
 - **Money:** `Product.price` is `Float`. No currency field anywhere; `USD` is hardcoded in `checkout/route.ts:42`.
@@ -85,14 +85,14 @@ Admin Dashboard (Next.js App Router, React 18, Tailwind, Radix/shadcn-derived UI
 
 **Critical — broken cross-store authorization (IDOR), confirmed by direct code read, present in every resource except `Store` itself:**
 
-| Resource | File | Handlers affected |
-|---|---|---|
+| Resource  | File                                                  | Handlers affected                                         |
+| --------- | ----------------------------------------------------- | --------------------------------------------------------- |
 | Billboard | `app/api/[storeId]/billboards/[billboardId]/route.ts` | `PATCH` (updateMany at :32), `DELETE` (deleteMany at :71) |
-| Category | `app/api/[storeId]/categories/[categoryId]/route.ts` | `PATCH` (updateMany at :35), `DELETE` (deleteMany at :74) |
-| Size | `app/api/[storeId]/sizes/[sizeId]/route.ts` | `PATCH` (updateMany at :35), `DELETE` (deleteMany at :74) |
-| Product | `app/api/[storeId]/products/[productId]/route.ts` | `PATCH` (update at :30/:47), `DELETE` (deleteMany at :89) |
+| Category  | `app/api/[storeId]/categories/[categoryId]/route.ts`  | `PATCH` (updateMany at :35), `DELETE` (deleteMany at :74) |
+| Size      | `app/api/[storeId]/sizes/[sizeId]/route.ts`           | `PATCH` (updateMany at :35), `DELETE` (deleteMany at :74) |
+| Product   | `app/api/[storeId]/products/[productId]/route.ts`     | `PATCH` (update at :30/:47), `DELETE` (deleteMany at :89) |
 
-The pattern in every case: the handler checks `prismadb.store.findFirst({ where: { id: params.storeId, userId } })` to confirm the *caller* owns the store named in the URL — then performs the actual mutation `where: { id: params.<resource>Id }`, **without also constraining by `storeId`**. A user who owns *any* store can PATCH or DELETE a billboard/category/size/product belonging to a *different* store, by calling e.g. `PATCH /api/{their-own-storeId}/products/{someone-elses-productId}` — their own-store check passes, and the update targets the other store's row by id alone. `Store` itself (`app/api/stores/[storeId]/route.ts:19-27`, `:46-52`) does this correctly — it includes `userId` directly in the `updateMany`/`deleteMany` `where` clause — proving the fix is a known-good pattern already in the codebase, just not applied consistently.
+The pattern in every case: the handler checks `prismadb.store.findFirst({ where: { id: params.storeId, userId } })` to confirm the _caller_ owns the store named in the URL — then performs the actual mutation `where: { id: params.<resource>Id }`, **without also constraining by `storeId`**. A user who owns _any_ store can PATCH or DELETE a billboard/category/size/product belonging to a _different_ store, by calling e.g. `PATCH /api/{their-own-storeId}/products/{someone-elses-productId}` — their own-store check passes, and the update targets the other store's row by id alone. `Store` itself (`app/api/stores/[storeId]/route.ts:19-27`, `:46-52`) does this correctly — it includes `userId` directly in the `updateMany`/`deleteMany` `where` clause — proving the fix is a known-good pattern already in the codebase, just not applied consistently.
 
 This is exactly the vulnerability class §6 of the transformation plan asks to be tested for explicitly ("User belonging to Store A must NOT be able to access Store B's products/categories/orders/settings/analytics") — it is not hypothetical, it is present today.
 
@@ -131,22 +131,22 @@ This is exactly the vulnerability class §6 of the transformation plan asks to b
 
 Stack is roughly **three years behind current** as of this audit (Sep 2026):
 
-| Package | Current | Concern |
-|---|---|---|
-| `next` | 13.4.19 | Next 13 App Router was still stabilizing; missing 3 major versions of fixes, partial prerendering, etc. Upgrade path 13→14→15→(16) has real breaking changes at each hop (`next/font`, middleware `matcher`, caching defaults changed 14→15). |
-| `@clerk/nextjs` | ^4.23.3 | Uses the **removed** `authMiddleware` API (`middleware.ts:1,6`). Clerk v5/v6 replaced this with `clerkMiddleware`. This is a breaking migration, not a bump — budget real time for it. |
-| `react` / `react-dom` | 18.2.0 | React 19 changes `useFormState`, ref handling, and is required by Next 15+. Coupled to the Next upgrade. |
-| `@prisma/client` / `prisma` | ^5.2.0 | Prisma 6 exists; migration is generally low-risk but must be re-validated against the Mongo connector specifically (see below). |
-| `zod` | ^3.22.2 | Zod 4 has breaking changes to error customization API used throughout the `react-hook-form` resolvers. |
-| `tailwindcss` | 3.3.3 | Tailwind 4 is a full engine rewrite (CSS-first config, no more `tailwind.config.js` as the primary mechanism) — should be sequenced *after* the config-file duplication is resolved, not before. |
-| `eslint` | 8.48.0 | ESLint 9's flat-config is required by current `eslint-config-next` majors — coupled to the Next upgrade. |
-| `stripe` | ^13.5.0 | Several majors behind; API version pinned in code (`lib/stripe.ts:5`, `"2023-08-16"`) so upgrading the SDK requires deliberately re-pinning and re-testing the API version, not just a version bump. |
+| Package                     | Current | Concern                                                                                                                                                                                                                                       |
+| --------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `next`                      | 13.4.19 | Next 13 App Router was still stabilizing; missing 3 major versions of fixes, partial prerendering, etc. Upgrade path 13→14→15→(16) has real breaking changes at each hop (`next/font`, middleware `matcher`, caching defaults changed 14→15). |
+| `@clerk/nextjs`             | ^4.23.3 | Uses the **removed** `authMiddleware` API (`middleware.ts:1,6`). Clerk v5/v6 replaced this with `clerkMiddleware`. This is a breaking migration, not a bump — budget real time for it.                                                        |
+| `react` / `react-dom`       | 18.2.0  | React 19 changes `useFormState`, ref handling, and is required by Next 15+. Coupled to the Next upgrade.                                                                                                                                      |
+| `@prisma/client` / `prisma` | ^5.2.0  | Prisma 6 exists; migration is generally low-risk but must be re-validated against the Mongo connector specifically (see below).                                                                                                               |
+| `zod`                       | ^3.22.2 | Zod 4 has breaking changes to error customization API used throughout the `react-hook-form` resolvers.                                                                                                                                        |
+| `tailwindcss`               | 3.3.3   | Tailwind 4 is a full engine rewrite (CSS-first config, no more `tailwind.config.js` as the primary mechanism) — should be sequenced _after_ the config-file duplication is resolved, not before.                                              |
+| `eslint`                    | 8.48.0  | ESLint 9's flat-config is required by current `eslint-config-next` majors — coupled to the Next upgrade.                                                                                                                                      |
+| `stripe`                    | ^13.5.0 | Several majors behind; API version pinned in code (`lib/stripe.ts:5`, `"2023-08-16"`) so upgrading the SDK requires deliberately re-pinning and re-testing the API version, not just a version bump.                                          |
 
 `npm audit` reports 30 vulnerabilities (17 high, 3 critical) on the current lockfile — these should be re-run and triaged (not blindly `audit fix --force`ed) once the major-version upgrade sequence begins, since several will resolve themselves as transitive deps move with Next/Clerk majors.
 
 ## 10. Contributor onboarding problems
 
-Beyond the missing docs files listed in §7: there is no way today for a new contributor to reach a *running, populated* app without personally provisioning a MongoDB Atlas cluster, a Clerk application, a Stripe account, and a Cloudinary account, and manually filling in seven+ environment variables with no guidance on what any of them do or which are safe to stub. This is the single largest barrier to the "open-source, developer-first" positioning the plan targets — it is a bigger blocker than any code-quality issue above.
+Beyond the missing docs files listed in §7: there is no way today for a new contributor to reach a _running, populated_ app without personally provisioning a MongoDB Atlas cluster, a Clerk application, a Stripe account, and a Cloudinary account, and manually filling in seven+ environment variables with no guidance on what any of them do or which are safe to stub. This is the single largest barrier to the "open-source, developer-first" positioning the plan targets — it is a bigger blocker than any code-quality issue above.
 
 ## 11. A load-bearing platform constraint the plan doesn't mention: MongoDB via Prisma
 
@@ -155,7 +155,7 @@ This affects the money model (§15), migrations tooling (§5/§10), and the Dock
 - **`prisma migrate` is not supported on the Mongo connector** — only `prisma db push`. Any `db:migrate` script this project ships will actually run `prisma db push` under the hood; that should be stated explicitly in docs rather than implied by the script's name.
 - **Prisma's `Decimal` scalar is not supported on MongoDB.** §15 of the plan offers a choice between `Decimal` and integer minor units — on this stack, only integer minor units (`priceCents: Int` + explicit `currency: String`) is actually available. This isn't a preference call; it's the only option, and should be documented as such.
 - **Prisma transactions/nested writes on Mongo require a replica set**, even for a single local node. A plain single-node `mongo` Docker image will not satisfy Prisma's transaction requirements — the `docker-compose.yml` this plan asks for needs a `--replSet` flag plus an `rs.initiate()` step (a small init container or entrypoint script), or seeding/nested-write operations will fail against local Docker Mongo in a way that won't reproduce against Atlas.
-- Staying on Mongo for the v0.2–v0.3 horizon is the pragmatic call; the plan's own §31 example issue list independently expects `[RFC] PostgreSQL migration` to be an *RFC*, not a default action — treat a Postgres migration as a documented, deferred decision (`docs/rfcs/`), not something this pass decides.
+- Staying on Mongo for the v0.2–v0.3 horizon is the pragmatic call; the plan's own §31 example issue list independently expects `[RFC] PostgreSQL migration` to be an _RFC_, not a default action — treat a Postgres migration as a documented, deferred decision (`docs/rfcs/`), not something this pass decides.
 
 ## 12. Recommended migration sequence
 
@@ -163,7 +163,7 @@ The plan's own numbering (§4 modernization before §6 testing) is worth deliber
 
 1. **This audit** (done).
 2. **Tooling + CI skeleton** — package.json scripts (`typecheck`, `test`, `format`, `db:seed`, `db:push`), Prettier, Vitest, a minimal `ci.yml` that runs them. No dependency majors bumped yet.
-3. **Cross-store authorization tests + the IDOR fix, together, in the same slice.** Write the failing test first (Store A cannot mutate Store B's product/category/size/billboard), fix the four route files, land it green in CI. This is the one security fix that should happen *before* the broader open-source push, independent of everything else.
+3. **Cross-store authorization tests + the IDOR fix, together, in the same slice.** Write the failing test first (Store A cannot mutate Store B's product/category/size/billboard), fix the four route files, land it green in CI. This is the one security fix that should happen _before_ the broader open-source push, independent of everything else.
 4. **Open-source foundation** — README rewrite, LICENSE (MIT), CONTRIBUTING/CODE_OF_CONDUCT/SECURITY/ARCHITECTURE/ROADMAP/AGENTS.md, `.env.example` completion, Docker Compose (with the Mongo replica-set caveat above), seed script.
 5. **Dependency upgrades, one major at a time**, each followed by `install → lint → typecheck → test → build`: Clerk v4→v6 first (breaking API, isolate it), then Next 13→14→15, then React 18→19, then Zod/Tailwind/ESLint majors.
 6. **Domain/module restructuring** (§13) and **money model migration to integer minor units** (§15/§11) — once tests exist to catch regressions and the stack is current.

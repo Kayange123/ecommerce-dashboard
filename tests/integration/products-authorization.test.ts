@@ -51,7 +51,9 @@ describe("cross-store authorization: products", () => {
     );
 
     expect(res.status).toBe(404);
-    const untouched = await fakeDb.product.findFirst({ where: { id: "product-b1" } });
+    const untouched = await fakeDb.product.findFirst({
+      where: { id: "product-b1" },
+    });
     expect(untouched.name).toBe("B Product");
   });
 
@@ -81,7 +83,9 @@ describe("cross-store authorization: products", () => {
     );
 
     expect(res.status).toBe(200);
-    const updated = await fakeDb.product.findFirst({ where: { id: "product-a1" } });
+    const updated = await fakeDb.product.findFirst({
+      where: { id: "product-a1" },
+    });
     expect(updated.name).toBe("Renamed");
   });
 });

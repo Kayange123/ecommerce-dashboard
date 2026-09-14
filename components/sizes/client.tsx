@@ -25,7 +25,7 @@ const SizeClient = ({ data }: SizeClientProps) => {
           description="Manage sizes for your category"
         />
         <Button onClick={() => router.push(`/${params?.storeId}/sizes/new`)}>
-          <Plus className="mr-4 w-4 h-4" />
+          <Plus className="mr-4 h-4 w-4" />
           <span>create</span>
         </Button>
       </div>

@@ -7,7 +7,10 @@ vi.mock("@/lib/prismadb", () => ({ default: fakeDb }));
 vi.mock("@clerk/nextjs", () => ({ auth: vi.fn() }));
 
 import { auth } from "@clerk/nextjs";
-import { DELETE, PATCH } from "@/app/api/[storeId]/billboards/[billboardId]/route";
+import {
+  DELETE,
+  PATCH,
+} from "@/app/api/[storeId]/billboards/[billboardId]/route";
 
 describe("cross-store authorization: billboards", () => {
   beforeEach(() => {
@@ -16,8 +19,18 @@ describe("cross-store authorization: billboards", () => {
       { id: "store-b", userId: "user-b" },
     ]);
     fakeDb.billboard = createFakeTable([
-      { id: "bb-a1", storeId: "store-a", label: "A Billboard", imageUrl: "http://img/a.png" },
-      { id: "bb-b1", storeId: "store-b", label: "B Billboard", imageUrl: "http://img/b.png" },
+      {
+        id: "bb-a1",
+        storeId: "store-a",
+        label: "A Billboard",
+        imageUrl: "http://img/a.png",
+      },
+      {
+        id: "bb-b1",
+        storeId: "store-b",
+        label: "B Billboard",
+        imageUrl: "http://img/b.png",
+      },
     ]);
     vi.mocked(auth).mockReturnValue({ userId: "user-a" } as any);
   });
@@ -35,13 +48,18 @@ describe("cross-store authorization: billboards", () => {
     const res = await PATCH(
       new Request("http://localhost/api/store-a/billboards/bb-b1", {
         method: "PATCH",
-        body: JSON.stringify({ label: "Hacked", imageUrl: "http://img/hacked.png" }),
+        body: JSON.stringify({
+          label: "Hacked",
+          imageUrl: "http://img/hacked.png",
+        }),
       }),
       { params: { storeId: "store-a", billboardId: "bb-b1" } }
     );
 
     expect(res.status).toBe(404);
-    const untouched = await fakeDb.billboard.findFirst({ where: { id: "bb-b1" } });
+    const untouched = await fakeDb.billboard.findFirst({
+      where: { id: "bb-b1" },
+    });
     expect(untouched.label).toBe("B Billboard");
   });
 

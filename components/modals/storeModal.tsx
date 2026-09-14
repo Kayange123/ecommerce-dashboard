@@ -77,7 +77,7 @@ export const StoreModal = () => {
                 </FormItem>
               )}
             />
-            <div className="pt-5 space-x-2 flex items-center justify-end">
+            <div className="flex items-center justify-end space-x-2 pt-5">
               <Button
                 disabled={isLoading}
                 variant="outline"

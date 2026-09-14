@@ -139,7 +139,7 @@ const ProductForm = ({
       <Separator />
       <Form {...form}>
         <form
-          className="space-y-8 w-full"
+          className="w-full space-y-8"
           onSubmit={form.handleSubmit(onSubmit)}
         >
           <FormField
@@ -166,7 +166,7 @@ const ProductForm = ({
               </FormItem>
             )}
           />
-          <div className="grid sm:grid-cols-3 gap-8">
+          <div className="grid gap-8 sm:grid-cols-3">
             <FormField
               control={form.control}
               name="name"
@@ -265,7 +265,7 @@ const ProductForm = ({
               control={form.control}
               name="isFeatured"
               render={({ field }) => (
-                <FormItem className="flex items-start flex-row space-x-3 space-y-0 rounded-md border p-4">
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
                     <Checkbox onCheckedChange={field.onChange} />
                   </FormControl>
@@ -282,7 +282,7 @@ const ProductForm = ({
               control={form.control}
               name="isArchived"
               render={({ field }) => (
-                <FormItem className="flex items-start flex-row space-x-3 space-y-0 rounded-md border p-4">
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
                     <Checkbox onCheckedChange={field.onChange} />
                   </FormControl>

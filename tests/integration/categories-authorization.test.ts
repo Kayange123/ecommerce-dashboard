@@ -7,7 +7,10 @@ vi.mock("@/lib/prismadb", () => ({ default: fakeDb }));
 vi.mock("@clerk/nextjs", () => ({ auth: vi.fn() }));
 
 import { auth } from "@clerk/nextjs";
-import { DELETE, PATCH } from "@/app/api/[storeId]/categories/[categoryId]/route";
+import {
+  DELETE,
+  PATCH,
+} from "@/app/api/[storeId]/categories/[categoryId]/route";
 
 describe("cross-store authorization: categories", () => {
   beforeEach(() => {
@@ -16,8 +19,18 @@ describe("cross-store authorization: categories", () => {
       { id: "store-b", userId: "user-b" },
     ]);
     fakeDb.category = createFakeTable([
-      { id: "cat-a1", storeId: "store-a", name: "A Category", billboardId: "bb-a" },
-      { id: "cat-b1", storeId: "store-b", name: "B Category", billboardId: "bb-b" },
+      {
+        id: "cat-a1",
+        storeId: "store-a",
+        name: "A Category",
+        billboardId: "bb-a",
+      },
+      {
+        id: "cat-b1",
+        storeId: "store-b",
+        name: "B Category",
+        billboardId: "bb-b",
+      },
     ]);
     vi.mocked(auth).mockReturnValue({ userId: "user-a" } as any);
   });
@@ -41,7 +54,9 @@ describe("cross-store authorization: categories", () => {
     );
 
     expect(res.status).toBe(404);
-    const untouched = await fakeDb.category.findFirst({ where: { id: "cat-b1" } });
+    const untouched = await fakeDb.category.findFirst({
+      where: { id: "cat-b1" },
+    });
     expect(untouched.name).toBe("B Category");
   });
 

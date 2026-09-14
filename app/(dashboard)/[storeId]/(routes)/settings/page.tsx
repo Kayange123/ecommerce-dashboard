@@ -6,28 +6,27 @@ import { redirect } from "next/navigation";
 interface SettingPageProps {
   params: {
     storeId: string;
-  }
+  };
 }
 
-const SettingPage = async ({params : { storeId}}: SettingPageProps) => {
+const SettingPage = async ({ params: { storeId } }: SettingPageProps) => {
+  const { userId } = auth();
 
-  const { userId} = auth();
-
-  if(!userId) redirect('/sign-in');
+  if (!userId) redirect("/sign-in");
   const store = await prismadb.store.findFirst({
     where: {
       id: storeId,
-      userId
-    }
+      userId,
+    },
   });
-  if(!store) redirect('/');
+  if (!store) redirect("/");
   return (
     <div className="flex flex-col">
-      <div className="flex-1 space-y-4 p-8 pt-6 ">
-        <SettingsForm initialData={store}/>
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <SettingsForm initialData={store} />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SettingPage
+export default SettingPage;

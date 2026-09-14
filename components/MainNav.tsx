@@ -58,7 +58,7 @@ const MainNav = ({
     <>
       <nav className={cn("space-x-4", className)}>
         <div
-          className={cn("hidden lg:flex items-center space-x-4 lg:space-x-6")}
+          className={cn("hidden items-center space-x-4 lg:flex lg:space-x-6")}
         >
           {routes.map((route) => (
             <Link
@@ -74,12 +74,12 @@ const MainNav = ({
               {route.label}
             </Link>
           ))}
-          <div className="mx-auto flex justify-center items-center space-x-4">
+          <div className="mx-auto flex items-center justify-center space-x-4">
             <UserButton afterSignOutUrl="/" />
           </div>
         </div>
         <div className="lg:hidden">
-          <Button className="lg:hidden bg-white" onClick={onOpen}>
+          <Button className="bg-white lg:hidden" onClick={onOpen}>
             <Menu size={25} color="black" />
           </Button>
           <Dialog
@@ -89,22 +89,22 @@ const MainNav = ({
             className="relative z-40 lg:hidden"
           >
             <div className="fixed inset-0 bg-black bg-opacity-25" />
-            <div className="flex fixed inset-0">
-              <Dialog.Panel className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto shadow-xl bg-white py-6 pb-4">
+            <div className="fixed inset-0 flex">
+              <Dialog.Panel className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-6 pb-4 shadow-xl">
                 <div className="flex items-center justify-end px-4">
                   <IconButton icon={<X size={20} />} onClick={onClose} />
                 </div>
-                <div className="mx-auto flex justify-center items-center space-x-4">
+                <div className="mx-auto flex items-center justify-center space-x-4">
                   <UserButton afterSignOutUrl="/" />
                 </div>
-                <div className="flex flex-col w-full space-y-3 mt-10 items-center">
+                <div className="mt-10 flex w-full flex-col items-center space-y-3">
                   {routes.map((route) => (
                     <Link
                       onClick={onClose}
                       key={route.href}
                       href={route.href}
                       className={cn(
-                        " font-medium text-xl transition-colors hover:text-primary",
+                        "text-xl font-medium transition-colors hover:text-primary",
                         route.active
                           ? "text-black dark:text-white"
                           : "text-muted-foreground"

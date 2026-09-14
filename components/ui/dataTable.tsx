@@ -31,7 +31,7 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
-  searchKey
+  searchKey,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
@@ -43,13 +43,12 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     state: {
       columnFilters,
-      
     },
   });
 
   return (
     <div>
-      <div className="items-center py-4 flex">
+      <div className="flex items-center py-4">
         <Input
           placeholder="Search..."
           className="max-w-sm"

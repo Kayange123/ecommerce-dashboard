@@ -1,0 +1,28 @@
+name: Feature request
+description: Propose a new feature or enhancement.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the use case before the implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: |
+        If this is a small, scoped change, describe it here.
+        If it's architectural (data model, auth model, a new domain
+        concept), consider an RFC instead: see docs/rfcs/README.md.
+    validations:
+      required: false
+  - type: checkboxes
+    id: roadmap
+    attributes:
+      label: Roadmap check
+      options:
+        - label: I checked ROADMAP.md and this isn't already planned/in progress
+          required: false

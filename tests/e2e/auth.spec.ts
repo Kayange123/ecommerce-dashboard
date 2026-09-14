@@ -1,0 +1,17 @@
+import { expect, test } from "@playwright/test";
+
+/**
+ * A real, currently-runnable smoke test: verifies the authentication
+ * boundary from middleware.ts without needing Clerk test credentials.
+ *
+ * The full authenticated journey (login → create store → create category
+ * → create product → view product → create order → view order) needs a
+ * signed-in session, which requires Clerk's testing-token support
+ * (@clerk/testing) and a configured Clerk test instance — tracked as a
+ * good first issue (docs/contributing/good-first-issues.md #17) rather
+ * than half-implemented here without a way to verify it actually works.
+ */
+test("unauthenticated visitors are redirected to sign-in", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveURL(/sign-in/);
+});
