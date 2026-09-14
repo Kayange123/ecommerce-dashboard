@@ -35,13 +35,14 @@ export async function PATCH(req: Request, {params}: {params: {storeId: string, c
         const category = await prismadb.category.updateMany({
             where: {
                 id: params.categoryId,
-                
+                storeId: params.storeId,
             },
             data : {
                 name,
                 billboardId
             }
         });
+        if(category.count === 0) return new NextResponse("Not Found", {status: 404});
         return NextResponse.json(category);
     } catch (error) {
         console.log('BILLBOARD_PATCH :', error);
@@ -74,10 +75,12 @@ export async function DELETE(_req: Request, {params}: {params: {storeId: string,
         const res = await prismadb.category.deleteMany({
             where: {
                 id: params.categoryId,
+                storeId: params.storeId,
             }
-            
+
         });
-        
+
+        if(res.count === 0) return new NextResponse("Not Found", {status: 404});
         return NextResponse.json(res);
     } catch (error) {
         //console.log('BILLBORD_DELETE :', error);

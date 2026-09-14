@@ -25,7 +25,14 @@ export async function PATCH(req: Request, {params}: {params: {storeId: string, p
             }
         })
         if(!storeByUserId) return new NextResponse("Unauthorized", {status: 403});
-        
+
+        const productByStoreId = await prismadb.product.findFirst({
+            where: {
+                id: params.productId,
+                storeId: params.storeId,
+            }
+        })
+        if(!productByStoreId) return new NextResponse("Not Found", {status: 404});
 
          await prismadb.product.update({
             where: {
@@ -76,7 +83,7 @@ export async function DELETE(_req: Request, {params}: {params: {storeId: string,
             return new NextResponse("Store ID is required", {status: 400});
         }
         if(!params.productId){
-            return new NextResponse("Billboard ID is required", {status: 400});
+            return new NextResponse("Product ID is required", {status: 400});
         }
         const storeByUserId = await prismadb.store.findFirst({
             where: {
@@ -89,9 +96,11 @@ export async function DELETE(_req: Request, {params}: {params: {storeId: string,
         const product = await prismadb.product.deleteMany({
             where: {
                 id: params.productId,
+                storeId: params.storeId,
             }
-            
+
         });
+        if(product.count === 0) return new NextResponse("Not Found", {status: 404});
         return NextResponse.json(product);
     } catch (error) {
         return new NextResponse("Internal Server Error", {status: 500});

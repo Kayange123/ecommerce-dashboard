@@ -35,14 +35,15 @@ export async function PATCH(req: Request, {params}: {params: {storeId: string, s
         const size = await prismadb.size.updateMany({
             where: {
                 id: params.sizeId,
-                
+                storeId: params.storeId,
             },
             data : {
                 name,
                 value,
             }
         });
-        return new NextResponse("Updated Successfully", {status: 201, statusText: "Ok"});
+        if(size.count === 0) return new NextResponse("Not Found", {status: 404});
+        return new NextResponse("Updated Successfully", {status: 200, statusText: "Ok"});
     } catch (error) {
         console.log('BILLBOARD_PATCH :', error);
         return new NextResponse("Internal Server Error", {status: 500});
@@ -74,11 +75,13 @@ export async function DELETE(_req: Request, {params}: {params: {storeId: string,
         const res = await prismadb.size.deleteMany({
             where: {
                 id: params.sizeId,
+                storeId: params.storeId,
             }
-            
+
         });
-        
-        return new NextResponse("deleted Successfully", {status: 201, statusText: "Ok"});
+
+        if(res.count === 0) return new NextResponse("Not Found", {status: 404});
+        return new NextResponse("deleted Successfully", {status: 200, statusText: "Ok"});
     } catch (error) {
         //console.log('BILLBORD_DELETE :', error);
         return new NextResponse("Internal Server Error", {status: 500});
