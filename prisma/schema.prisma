@@ -11,102 +11,112 @@ datasource db {
 }
 
 model Store {
-  id String @id @default(uuid()) @map("_id") @db.String
-  name String
-  userId String 
+  id        String   @id @default(uuid()) @map("_id") @db.String
+  name      String
+  userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orders Order[]
-  sizes Size[]
+  orders     Order[]
+  sizes      Size[]
   billboards Billboard[]
   categories Category[]
-  products Product[] 
+  products   Product[]
 }
 
 model Billboard {
-  id String @id @default(uuid()) @map("_id") @db.String
-  storeId String @db.String()
-  label String
-  imageUrl String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String     @id @default(uuid()) @map("_id") @db.String
+  storeId    String     @db.String()
+  label      String
+  imageUrl   String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
   categories Category[]
-  store Store @relation(fields: [storeId], references: [id])
+  store      Store      @relation(fields: [storeId], references: [id])
 }
 
 model Category {
-  id String @id @default(uuid()) @map("_id") @db.String
-  storeId String @db.String()
-  name String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  billboardId String @db.String()
+  id          String   @id @default(uuid()) @map("_id") @db.String
+  storeId     String   @db.String()
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  billboardId String   @db.String()
 
   products Product[]
-  
+
   billboard Billboard @relation(fields: [billboardId], references: [id])
-  store Store @relation(fields: [storeId], references: [id])
-  
+  store     Store     @relation(fields: [storeId], references: [id])
 }
 
 model Size {
-  id String @id @default(uuid()) @map("_id") @db.String
-  name String
-  storeId String @db.String()
+  id        String   @id @default(uuid()) @map("_id") @db.String
+  name      String
+  storeId   String   @db.String()
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  value String
+  value     String
 
   products Product[]
-  store Store @relation(fields: [storeId], references: [id])
+  store    Store     @relation(fields: [storeId], references: [id])
 }
 
 model Product {
-  id String @id @default(uuid()) @map("_id") @db.String
-  storeId String @db.String 
-  categoryId String @db.String()
-  name String
-  price Float
-  isFeatured Boolean @default(false)
-  isArchived Boolean @default(false)
-  sizeId String @db.String()
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid()) @map("_id") @db.String
+  storeId    String   @db.String
+  categoryId String   @db.String()
+  name       String
+  price      Float
+  isFeatured Boolean  @default(false)
+  isArchived Boolean  @default(false)
+  sizeId     String   @db.String()
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   orderItems OrderItem[]
-  images Image[]
-  size Size @relation(fields: [sizeId], references: [id])
-  store Store @relation(fields: [storeId], references: [id])
-  category Category @relation(fields: [categoryId], references: [id])
+  images     Image[]
+  size       Size        @relation(fields: [sizeId], references: [id])
+  store      Store       @relation(fields: [storeId], references: [id])
+  category   Category    @relation(fields: [categoryId], references: [id])
 }
 
 model Image {
-  id String @id @default(uuid()) @map("_id") @db.String
-  productId String @db.String()
+  id        String   @id @default(uuid()) @map("_id") @db.String
+  productId String   @db.String()
   createdAt DateTime @default(now())
-  url String
+  url       String
   updatedAt DateTime @updatedAt
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Order {
-  id String @id @default(uuid()) @map("_id") @db.String
-  storeId String @db.String()
-  isPaid Boolean @default(false)
-  phone String @default("")
-  address String @default("")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String      @id @default(uuid()) @map("_id") @db.String
+  storeId    String      @db.String()
+  isPaid     Boolean     @default(false)
+  phone      String      @default("")
+  address    String      @default("")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
   orderItems OrderItem[]
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
 }
 
 model OrderItem {
-  id String @id @default(uuid()) @map("_id") @db.String
-  orderId String @db.String()
+  id        String @id @default(uuid()) @map("_id") @db.String
+  orderId   String @db.String()
   productId String @db.String()
 
   product Product @relation(fields: [productId], references: [id])
-  order Order @relation(fields: [orderId], references: [id])
+  order   Order   @relation(fields: [orderId], references: [id])
+}
+
+// Records Stripe webhook events already processed, keyed by Stripe's own
+// event.id, so a retried delivery (Stripe retries on a slow/failed
+// response) doesn't re-run the checkout.session.completed side effects.
+// Written *after* those side effects succeed, not before — see
+// docs/architecture/payments.md.
+model ProcessedWebhookEvent {
+  id          String   @id @map("_id") @db.String
+  type        String
+  processedAt DateTime @default(now())
 }

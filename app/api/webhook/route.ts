@@ -35,6 +35,13 @@ export async function POST(req: Request) {
   const addressStr = addressValue.filter((add) => add !== null).join(", ");
 
   if (event.type === "checkout.session.completed") {
+    const alreadyProcessed = await prismadb.processedWebhookEvent.findFirst({
+      where: { id: event.id },
+    });
+    if (alreadyProcessed) {
+      return new NextResponse("Event already processed", { status: 200 });
+    }
+
     const order = await prismadb.order.update({
       where: {
         id: session?.metadata?.orderId,
@@ -58,6 +65,15 @@ export async function POST(req: Request) {
       data: {
         isArchived: true,
       },
+    });
+
+    // Recorded after the side effects above succeed, not before: both
+    // side effects are idempotent set-to-a-fixed-value writes, so a crash
+    // between them and this insert just costs one harmless extra retry,
+    // whereas recording first could permanently mark a not-actually-
+    // processed event as done if the process died in between.
+    await prismadb.processedWebhookEvent.create({
+      data: { id: event.id, type: event.type },
     });
   }
   return new NextResponse("webhooks provided successfully", { status: 200 });
