@@ -13,7 +13,7 @@ Store
     └── size (1)
 
 Order
-└── OrderItem → Product
+└── OrderItem (quantity, stripeLineItemId) → Product
 ```
 
 See [prisma/schema.prisma](../../prisma/schema.prisma) for the exact
@@ -31,15 +31,21 @@ fields.
   inventory tracking and produces wrong behavior the moment more than one
   unit of a product exists to sell. Planned: `InventoryItem`,
   `InventoryAdjustment`, with an explicit concurrency story (not naive
-  `stock = stock - quantity`).
-- **`OrderItem` has no `quantity`.** Combined with Stripe checkout
-  allowing `adjustable_quantity`, this means changing quantity at checkout
-  today silently produces an order whose recorded total doesn't match what
-  was actually charged. This needs fixing before any inventory work, since
-  inventory depends on knowing how many units were ordered.
+  `stock = stock - quantity`). Now that `OrderItem.quantity` exists (see
+  below), this is unblocked — inventory work needs to know how many units
+  were ordered, and now can.
 - **No `Customer` model.** Orders aren't linked to a customer entity
   distinct from the admin `Store.userId`. Planned as part of v0.3,
   separate from Clerk-authenticated admin users.
+
+## Fixed since the initial audit
+
+- **`OrderItem` now has `quantity` and `stripeLineItemId`.** Every
+  revenue/order-total calculation previously assumed 1 unit per line
+  item regardless of Stripe's `adjustable_quantity`; the final quantity
+  is now backfilled from the completed Checkout Session at webhook time,
+  joined via `stripeLineItemId`. See
+  [payments.md](payments.md#fixed-since-the-initial-audit).
 
 ## Money
 
