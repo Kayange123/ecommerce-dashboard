@@ -26,6 +26,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   New `ProcessedWebhookEvent` model, keyed by Stripe's `event.id`. Added
   `tests/integration/webhook-idempotency.test.ts`.
 
+### Changed
+
+- Bumped Next.js 13.4.19 → 13.5.11 (prerequisite for the Clerk upgrade
+  below — same major, no breaking changes).
+- Migrated Clerk v4.23.3 → v6.39.6: `middleware.ts` rewritten for
+  `clerkMiddleware`/`createRouteMatcher` (v4's `authMiddleware` was
+  removed), `auth()` is now async and imported from
+  `@clerk/nextjs/server`. Verified the resulting middleware behavior
+  against a running Docker container (not just tests) — see
+  `docs/architecture/authentication.md`. Required adding
+  `experimental.serverActions` to `next.config.js` and a build-time
+  `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (documented in `Dockerfile` and
+  `docs/deployment/README.md`), since Clerk v6 needs both at build time
+  in ways v4 didn't.
+
 ### Added
 
 - Repository audit: `docs/audits/current-state.md`.
