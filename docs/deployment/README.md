@@ -9,6 +9,13 @@
   won't process real payments or send real emails).
 - `STRIPE_WEB_HOOK_SECRET` matching a webhook endpoint configured in the
   Stripe dashboard to point at `https://<your-domain>/api/webhook`.
+- **Outbound internet access during the build itself**, not just at
+  runtime. `app/layout.tsx` uses `next/font/google` (Poppins), which
+  `next build` fetches from `fonts.gstatic.com`/`fonts.googleapis.com`
+  at build time — a build running behind a restrictive firewall/proxy
+  (some CI runners, locked-down Docker daemons) will fail with `next/font
+error: Failed to fetch 'Poppins' from Google Fonts`, not because of
+  anything wrong with the app or its dependencies.
 
 ## Option A: Node runtime
 
