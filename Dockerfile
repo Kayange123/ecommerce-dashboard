@@ -13,6 +13,22 @@ RUN npm ci
 FROM deps AS build
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# @clerk/nextjs@6's ClerkProvider throws during page prerendering if no
+# publishableKey is present — `npm run build` now fails without one,
+# where the previous Clerk major didn't require this. Only the *public*
+# key is needed at build time (confirmed: the build succeeds with no
+# CLERK_SECRET_KEY set at all — that one is only read server-side at
+# runtime, never baked into the client bundle, so it deliberately isn't
+# an ARG here to avoid landing a secret in the image's build history).
+# The placeholder default below lets `docker build` succeed out of the
+# box (matching CI); NEXT_PUBLIC_* values are baked into the client
+# bundle at BUILD time, not read at container start, so a real
+# deployment must pass its real publishable key via `--build-arg`, not
+# `docker run -e`. See docs/deployment/README.md.
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_ZmFrZS1rZXktZm9yLWJ1aWxkLnRlc3QuY2xlcmsuYWNjb3VudHMuZGV2JA
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+
 RUN npm run build
 
 FROM base AS runner

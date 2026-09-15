@@ -4,9 +4,9 @@ import { createFakeTable } from "../helpers/fakePrisma";
 const { fakeDb } = vi.hoisted(() => ({ fakeDb: {} as Record<string, any> }));
 
 vi.mock("@/lib/prismadb", () => ({ default: fakeDb }));
-vi.mock("@clerk/nextjs", () => ({ auth: vi.fn() }));
+vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn() }));
 
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { DELETE, PATCH } from "@/app/api/[storeId]/products/[productId]/route";
 
 function patchRequest(body: unknown) {
@@ -26,7 +26,7 @@ describe("cross-store authorization: products", () => {
       { id: "product-a1", storeId: "store-a", name: "A Product", price: 10 },
       { id: "product-b1", storeId: "store-b", name: "B Product", price: 20 },
     ]);
-    vi.mocked(auth).mockReturnValue({ userId: "user-a" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "user-a" } as any);
   });
 
   it("does not let a user delete another store's product through their own store id", async () => {

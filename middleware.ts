@@ -1,10 +1,22 @@
-import { authMiddleware } from "@clerk/nextjs";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// This example protects all routes including api/trpc routes
-// Please edit this to allow other routes to be public as needed.
-// See https://clerk.com/docs/references/nextjs/auth-middleware for more information about configuring your middleware
-export default authMiddleware({
-  publicRoutes: ["/api/:path*"],
+// authMiddleware (v4) was removed in Clerk v6 in favor of clerkMiddleware,
+// which protects nothing by default — unlike v4, where every route was
+// protected except publicRoutes. This isPublicRoute matcher intentionally
+// reproduces the old publicRoutes: ["/api/:path*"] behavior: /api/* stays
+// unenforced by Clerk (every route handler already hand-checks auth()
+// itself — see docs/architecture/authentication.md), sign-in/up stay
+// reachable while signed out, and everything else requires a session.
+const isPublicRoute = createRouteMatcher([
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/api(.*)",
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (!isPublicRoute(req)) {
+    await auth.protect();
+  }
 });
 
 export const config = {

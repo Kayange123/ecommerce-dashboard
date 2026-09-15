@@ -1,6 +1,6 @@
 import SettingsForm from "@/components/SettingsForm";
 import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 interface SettingPageProps {
@@ -10,7 +10,7 @@ interface SettingPageProps {
 }
 
 const SettingPage = async ({ params: { storeId } }: SettingPageProps) => {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   if (!userId) redirect("/sign-in");
   const store = await prismadb.store.findFirst({

@@ -40,4 +40,11 @@ jobs:
         run: npm run test:integration
 
       - name: Build
+        # @clerk/nextjs@6's ClerkProvider throws during page prerendering
+        # if no publishableKey is present at all — this placeholder value
+        # is not a real secret, just a well-formed key so the build
+        # doesn't crash. It's never used to make a real Clerk API call in
+        # CI. See Dockerfile for the same requirement at image build time.
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZmFrZS1rZXktZm9yLWJ1aWxkLnRlc3QuY2xlcmsuYWNjb3VudHMuZGV2JA
         run: npm run build

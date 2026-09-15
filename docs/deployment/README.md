@@ -24,9 +24,21 @@ hosting platform's config, not in a committed file.
 ## Option B: Container
 
 ```bash
-docker build -t ecommerce-dashboard .
+docker build --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_your_real_key -t ecommerce-dashboard .
 docker run -p 3000:3000 --env-file .env ecommerce-dashboard
 ```
+
+**`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` must be passed with `--build-arg`,
+not just in the `.env` file used at `docker run` time.** Next.js inlines
+every `NEXT_PUBLIC_*` variable into the client JavaScript bundle at
+_build_ time — setting it only at `docker run` has no effect, since the
+bundle was already produced with whatever value (or the Dockerfile's
+placeholder default) was present during `docker build`. This is standard
+Next.js-in-Docker behavior, not specific to this app, but easy to get
+bitten by: if the deployed site is calling Clerk with the wrong
+publishable key, this is almost always why. `CLERK_SECRET_KEY` doesn't
+have this problem — it's read server-side at runtime, so `--env-file`/
+`docker run -e` at container start works normally for it.
 
 The provided [Dockerfile](../../Dockerfile) is a multi-stage production
 build; it does not run `prisma db push` on start — apply schema changes

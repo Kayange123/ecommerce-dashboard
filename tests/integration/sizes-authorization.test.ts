@@ -4,9 +4,9 @@ import { createFakeTable } from "../helpers/fakePrisma";
 const { fakeDb } = vi.hoisted(() => ({ fakeDb: {} as Record<string, any> }));
 
 vi.mock("@/lib/prismadb", () => ({ default: fakeDb }));
-vi.mock("@clerk/nextjs", () => ({ auth: vi.fn() }));
+vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn() }));
 
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { DELETE, PATCH } from "@/app/api/[storeId]/sizes/[sizeId]/route";
 
 describe("cross-store authorization: sizes", () => {
@@ -19,7 +19,7 @@ describe("cross-store authorization: sizes", () => {
       { id: "size-a1", storeId: "store-a", name: "Small", value: "S" },
       { id: "size-b1", storeId: "store-b", name: "Large", value: "L" },
     ]);
-    vi.mocked(auth).mockReturnValue({ userId: "user-a" } as any);
+    vi.mocked(auth).mockResolvedValue({ userId: "user-a" } as any);
   });
 
   it("does not let a user delete another store's size through their own store id", async () => {
