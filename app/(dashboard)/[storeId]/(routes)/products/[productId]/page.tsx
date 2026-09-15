@@ -4,11 +4,10 @@ import prismadb from "@/lib/prismadb";
 import {} from "@prisma/client";
 import React from "react";
 
-const ProductPage = async ({
-  params,
-}: {
-  params: { productId: string; storeId: string };
+const ProductPage = async (props: {
+  params: Promise<{ productId: string; storeId: string }>;
 }) => {
+  const params = await props.params;
   const product = await prismadb.product.findFirst({
     where: {
       id: params.productId,

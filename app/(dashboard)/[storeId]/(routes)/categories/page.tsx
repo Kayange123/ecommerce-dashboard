@@ -3,7 +3,10 @@ import { CategoryColumn } from "@/components/categories/Columns";
 import prismadb from "@/lib/prismadb";
 import { format } from "date-fns";
 
-const CategoriesPage = async ({ params }: { params: { storeId: string } }) => {
+const CategoriesPage = async (props: {
+  params: Promise<{ storeId: string }>;
+}) => {
+  const params = await props.params;
   const categories = await prismadb.category.findMany({
     where: {
       storeId: params.storeId,

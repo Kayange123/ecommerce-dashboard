@@ -51,7 +51,13 @@ const formSchema = z.object({
   isFeatured: z.boolean().default(false),
   isArchived: z.boolean().default(false),
 });
-type ProductFormValues = z.infer<typeof formSchema>;
+// z.input (not z.infer/z.output): the form works with the schema's
+// pre-parse shape, where isFeatured/isArchived are optional (defaulted).
+// A newer @hookform/resolvers version started distinguishing the zod
+// schema's input vs. output types more strictly, and useForm's generic
+// needs to match the resolver's input type, not the post-.default()
+// output type.
+type ProductFormValues = z.input<typeof formSchema>;
 
 const ProductForm = ({
   initialData,

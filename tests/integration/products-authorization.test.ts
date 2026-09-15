@@ -31,7 +31,7 @@ describe("cross-store authorization: products", () => {
 
   it("does not let a user delete another store's product through their own store id", async () => {
     const res = await DELETE(new Request("http://localhost"), {
-      params: { storeId: "store-a", productId: "product-b1" },
+      params: Promise.resolve({ storeId: "store-a", productId: "product-b1" }),
     });
 
     expect(res.status).toBe(404);
@@ -47,7 +47,12 @@ describe("cross-store authorization: products", () => {
         sizeId: "size-1",
         images: [{ url: "http://img.example/1.png" }],
       }),
-      { params: { storeId: "store-a", productId: "product-b1" } }
+      {
+        params: Promise.resolve({
+          storeId: "store-a",
+          productId: "product-b1",
+        }),
+      }
     );
 
     expect(res.status).toBe(404);
@@ -59,7 +64,7 @@ describe("cross-store authorization: products", () => {
 
   it("lets a user delete their own store's product", async () => {
     const res = await DELETE(new Request("http://localhost"), {
-      params: { storeId: "store-a", productId: "product-a1" },
+      params: Promise.resolve({ storeId: "store-a", productId: "product-a1" }),
     });
 
     expect(res.status).toBe(200);
@@ -79,7 +84,12 @@ describe("cross-store authorization: products", () => {
           images: [{ url: "http://img.example/1.png" }],
         }),
       }),
-      { params: { storeId: "store-a", productId: "product-a1" } }
+      {
+        params: Promise.resolve({
+          storeId: "store-a",
+          productId: "product-a1",
+        }),
+      }
     );
 
     expect(res.status).toBe(200);

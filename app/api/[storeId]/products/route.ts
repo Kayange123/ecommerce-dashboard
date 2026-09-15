@@ -4,8 +4,9 @@ import { NextResponse } from "next/server";
 
 export async function POST(
   req: Request,
-  { params }: { params: { storeId: string } }
+  props: { params: Promise<{ storeId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { userId } = await auth();
     const body = await req.json();
@@ -59,8 +60,9 @@ export async function POST(
 // GET -> {origin}/{storeId}/products
 export async function GET(
   req: Request,
-  { params }: { params: { storeId: string } }
+  props: { params: Promise<{ storeId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { searchParams } = new URL(req.url);
     const categoryId = searchParams.get("categoryId") || undefined;

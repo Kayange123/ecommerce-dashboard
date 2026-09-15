@@ -24,7 +24,7 @@ describe("cross-store authorization: sizes", () => {
 
   it("does not let a user delete another store's size through their own store id", async () => {
     const res = await DELETE(new Request("http://localhost"), {
-      params: { storeId: "store-a", sizeId: "size-b1" },
+      params: Promise.resolve({ storeId: "store-a", sizeId: "size-b1" }),
     });
 
     expect(res.status).toBe(404);
@@ -37,7 +37,7 @@ describe("cross-store authorization: sizes", () => {
         method: "PATCH",
         body: JSON.stringify({ name: "Hacked", value: "XL" }),
       }),
-      { params: { storeId: "store-a", sizeId: "size-b1" } }
+      { params: Promise.resolve({ storeId: "store-a", sizeId: "size-b1" }) }
     );
 
     expect(res.status).toBe(404);
@@ -47,7 +47,7 @@ describe("cross-store authorization: sizes", () => {
 
   it("lets a user delete their own store's size", async () => {
     const res = await DELETE(new Request("http://localhost"), {
-      params: { storeId: "store-a", sizeId: "size-a1" },
+      params: Promise.resolve({ storeId: "store-a", sizeId: "size-a1" }),
     });
 
     expect(res.status).toBe(200);

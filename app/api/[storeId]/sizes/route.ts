@@ -4,8 +4,9 @@ import { NextResponse } from "next/server";
 
 export async function POST(
   req: Request,
-  { params }: { params: { storeId: string } }
+  props: { params: Promise<{ storeId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { userId } = await auth();
     const body = await req.json();
@@ -41,8 +42,9 @@ export async function POST(
 
 export async function GET(
   _req: Request,
-  { params }: { params: { storeId: string } }
+  props: { params: Promise<{ storeId: string }> }
 ) {
+  const params = await props.params;
   try {
     if (!params.storeId)
       return new NextResponse("Store ID is required", { status: 400 });

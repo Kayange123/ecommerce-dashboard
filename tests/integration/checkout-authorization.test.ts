@@ -53,7 +53,7 @@ describe("cross-store authorization: checkout", () => {
 
   it("rejects a checkout mixing another store's product id", async () => {
     const res = await POST(checkoutRequest(["product-a1", "product-b1"]), {
-      params: { storeId: "store-a" },
+      params: Promise.resolve({ storeId: "store-a" }),
     });
 
     expect(res.status).toBe(400);
@@ -63,7 +63,7 @@ describe("cross-store authorization: checkout", () => {
 
   it("rejects a checkout for only another store's product", async () => {
     const res = await POST(checkoutRequest(["product-b1"]), {
-      params: { storeId: "store-a" },
+      params: Promise.resolve({ storeId: "store-a" }),
     });
 
     expect(res.status).toBe(400);
@@ -72,7 +72,7 @@ describe("cross-store authorization: checkout", () => {
 
   it("allows a checkout entirely within the requested store", async () => {
     const res = await POST(checkoutRequest(["product-a1"]), {
-      params: { storeId: "store-a" },
+      params: Promise.resolve({ storeId: "store-a" }),
     });
 
     expect(res.status).toBe(200);
@@ -89,7 +89,7 @@ describe("cross-store authorization: checkout", () => {
     const updateManySpy = vi.spyOn(fakeDb.orderItem, "updateMany");
 
     await POST(checkoutRequest(["product-a1"]), {
-      params: { storeId: "store-a" },
+      params: Promise.resolve({ storeId: "store-a" }),
     });
 
     expect(updateManySpy).toHaveBeenCalledWith({

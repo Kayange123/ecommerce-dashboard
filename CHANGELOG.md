@@ -40,6 +40,41 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (documented in `Dockerfile` and
   `docs/deployment/README.md`), since Clerk v6 needs both at build time
   in ways v4 didn't.
+- Bumped Next.js 13.5.11 → 14.2.35. Removed the `experimental.serverActions`
+  flag added in the prior commit — Next 14 makes it the default and warns
+  if the flag is left in. Bumped `next-cloudinary` 4.20.0 → 6.19.0 (v4's
+  peer range didn't cover Next 14 at all).
+- Bumped Next.js 14.2.35 → 15.5.25 and React 18.2.0 → 19.3.0 together
+  (Next 15 requires React 19 as a peer). This was the largest step:
+  Next 15 makes route `params`/`searchParams` `Promise`-based — ran
+  `npx @next/codemod@canary next-async-request-api .` across all 22
+  affected files, then manually updated the 5 test files that call
+  route handlers directly with plain (non-Promise) `params` objects.
+  `next.config.js`'s `images.domains` → `images.remotePatterns`.
+  React 19 also forced version bumps through most of the UI dependency
+  tree, since `npm ci` (used by CI/Docker, unlike a plain `npm install`)
+  hard-fails on any unresolved peer conflict rather than warning: all 8
+  `@radix-ui/react-*` packages, `@headlessui/react` 1→2 (`Dialog.Panel`
+  is deprecated but still works in v2 — migrated `components/MainNav.tsx`
+  to `DialogPanel` anyway), `cmdk` 0.2→1.1, `lucide-react` 0.274→1.46,
+  `react-hook-form` 7.46→7.88, `@hookform/resolvers` 3→5 (which forced a
+  `zod` patch bump to 3.25.76 to satisfy its peer range — staying on
+  zod v3, not the v4 migration planned separately), `recharts` 2→3 (only
+  used by the dashboard's dead/unrendered `Overview` component, so purely
+  a peer-satisfying bump with zero behavioral risk), and `zustand` 4→5
+  (verified `hooks/useStoreModal.ts`'s simple `create<T>((set) => ...)`
+  pattern still works under v5). Also fixed a real type mismatch in
+  `components/ProductForm.tsx` that a newer `@hookform/resolvers`
+  surfaced: the form's type used `z.infer` (post-`.default()` output,
+  required booleans) where it needed `z.input` (pre-parse, optional
+  booleans) to match what `zodResolver` and `useForm` actually exchange.
+  `next lint` now prints a deprecation notice (removed in Next 16) but
+  still works. Verified: typecheck, all 27 tests, lint, `next build`,
+  and (via `npm run start` rather than Docker, since this sandbox's
+  Docker network reliably can't reach Google Fonts) the same real-HTTP
+  Clerk middleware checks as the previous Clerk commit — still redirect
+  to `/sign-in`, still return `401` from the app's own check on
+  `/api/stores`, unchanged after this much larger jump.
 
 ### Added
 

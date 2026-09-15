@@ -4,8 +4,9 @@ import { NextResponse } from "next/server";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { storeId: string; categoryId: string } }
+  props: { params: Promise<{ storeId: string; categoryId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { userId } = await auth();
     const body = await req.json();
@@ -55,8 +56,9 @@ export async function PATCH(
 }
 export async function DELETE(
   _req: Request,
-  { params }: { params: { storeId: string; categoryId: string } }
+  props: { params: Promise<{ storeId: string; categoryId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { userId } = await auth();
 
@@ -95,8 +97,9 @@ export async function DELETE(
 }
 export async function GET(
   _req: Request,
-  { params }: { params: { categoryId: string } }
+  props: { params: Promise<{ categoryId: string }> }
 ) {
+  const params = await props.params;
   try {
     if (!params.categoryId) {
       return new NextResponse("Category ID is required", { status: 400 });

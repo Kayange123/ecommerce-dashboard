@@ -4,12 +4,16 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 interface SettingPageProps {
-  params: {
+  params: Promise<{
     storeId: string;
-  };
+  }>;
 }
 
-const SettingPage = async ({ params: { storeId } }: SettingPageProps) => {
+const SettingPage = async (props: SettingPageProps) => {
+  const params = await props.params;
+
+  const { storeId } = params;
+
   const { userId } = await auth();
 
   if (!userId) redirect("/sign-in");

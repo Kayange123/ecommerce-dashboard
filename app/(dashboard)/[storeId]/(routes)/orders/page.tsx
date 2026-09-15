@@ -3,7 +3,8 @@ import OrderClient from "@/components/orders/client";
 import prismadb from "@/lib/prismadb";
 import { format } from "date-fns";
 
-const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
+const OrdersPage = async (props: { params: Promise<{ storeId: string }> }) => {
+  const params = await props.params;
   const orders = await prismadb.order.findMany({
     where: {
       storeId: params.storeId,

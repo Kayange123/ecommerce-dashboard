@@ -5,7 +5,7 @@ import { useParams, usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Menu, X } from "lucide-react";
-import { Dialog } from "@headlessui/react";
+import { Dialog, DialogPanel } from "@headlessui/react";
 import { UserButton } from "@clerk/nextjs";
 import IconButton from "./ui/IconButton";
 const MainNav = ({
@@ -90,7 +90,7 @@ const MainNav = ({
           >
             <div className="fixed inset-0 bg-black bg-opacity-25" />
             <div className="fixed inset-0 flex">
-              <Dialog.Panel className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-6 pb-4 shadow-xl">
+              <DialogPanel className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-6 pb-4 shadow-xl">
                 <div className="flex items-center justify-end px-4">
                   <IconButton icon={<X size={20} />} onClick={onClose} />
                 </div>
@@ -114,7 +114,7 @@ const MainNav = ({
                     </Link>
                   ))}
                 </div>
-              </Dialog.Panel>
+              </DialogPanel>
             </div>
           </Dialog>
         </div>

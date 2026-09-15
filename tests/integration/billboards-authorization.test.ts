@@ -37,7 +37,7 @@ describe("cross-store authorization: billboards", () => {
 
   it("does not let a user delete another store's billboard through their own store id", async () => {
     const res = await DELETE(new Request("http://localhost"), {
-      params: { storeId: "store-a", billboardId: "bb-b1" },
+      params: Promise.resolve({ storeId: "store-a", billboardId: "bb-b1" }),
     });
 
     expect(res.status).toBe(404);
@@ -53,7 +53,7 @@ describe("cross-store authorization: billboards", () => {
           imageUrl: "http://img/hacked.png",
         }),
       }),
-      { params: { storeId: "store-a", billboardId: "bb-b1" } }
+      { params: Promise.resolve({ storeId: "store-a", billboardId: "bb-b1" }) }
     );
 
     expect(res.status).toBe(404);
@@ -65,7 +65,7 @@ describe("cross-store authorization: billboards", () => {
 
   it("lets a user delete their own store's billboard", async () => {
     const res = await DELETE(new Request("http://localhost"), {
-      params: { storeId: "store-a", billboardId: "bb-a1" },
+      params: Promise.resolve({ storeId: "store-a", billboardId: "bb-a1" }),
     });
 
     expect(res.status).toBe(200);

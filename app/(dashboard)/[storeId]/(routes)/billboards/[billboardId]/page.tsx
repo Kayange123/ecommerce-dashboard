@@ -3,11 +3,10 @@ import prismadb from "@/lib/prismadb";
 import {} from "@prisma/client";
 import React from "react";
 
-const BillboardPage = async ({
-  params,
-}: {
-  params: { billboardId: string };
+const BillboardPage = async (props: {
+  params: Promise<{ billboardId: string }>;
 }) => {
+  const params = await props.params;
   const billboard = await prismadb.billboard.findFirst({
     where: {
       id: params.billboardId,

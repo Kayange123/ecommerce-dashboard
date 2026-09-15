@@ -12,10 +12,11 @@ import { priceFormat } from "@/lib/utils";
 import { CreditCard, DollarSign, Package } from "lucide-react";
 
 interface DashboardPageProps {
-  params: { storeId: string };
+  params: Promise<{ storeId: string }>;
 }
 
-const DashboardPage = async ({ params }: DashboardPageProps) => {
+const DashboardPage = async (props: DashboardPageProps) => {
+  const params = await props.params;
   const revenue = await getTotalRevenue(params.storeId);
   const salesCount = await getTotalSales(params.storeId);
   const stockCount = await getStockSize(params.storeId);

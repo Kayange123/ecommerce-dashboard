@@ -37,7 +37,7 @@ describe("cross-store authorization: categories", () => {
 
   it("does not let a user delete another store's category through their own store id", async () => {
     const res = await DELETE(new Request("http://localhost"), {
-      params: { storeId: "store-a", categoryId: "cat-b1" },
+      params: Promise.resolve({ storeId: "store-a", categoryId: "cat-b1" }),
     });
 
     expect(res.status).toBe(404);
@@ -50,7 +50,7 @@ describe("cross-store authorization: categories", () => {
         method: "PATCH",
         body: JSON.stringify({ name: "Hacked", billboardId: "bb-b" }),
       }),
-      { params: { storeId: "store-a", categoryId: "cat-b1" } }
+      { params: Promise.resolve({ storeId: "store-a", categoryId: "cat-b1" }) }
     );
 
     expect(res.status).toBe(404);
@@ -62,7 +62,7 @@ describe("cross-store authorization: categories", () => {
 
   it("lets a user delete their own store's category", async () => {
     const res = await DELETE(new Request("http://localhost"), {
-      params: { storeId: "store-a", categoryId: "cat-a1" },
+      params: Promise.resolve({ storeId: "store-a", categoryId: "cat-a1" }),
     });
 
     expect(res.status).toBe(200);
