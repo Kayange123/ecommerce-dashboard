@@ -48,7 +48,7 @@
     "lucide-react": "^1.46.0",
     "next": "^15.5.25",
     "next-cloudinary": "^6.19.0",
-    "postcss": "8.4.29",
+    "postcss": "8.5.28",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-hook-form": "^7.88.0",
