@@ -2,7 +2,7 @@
 # this image — run `docker compose up -d` for the database, then `npm run
 # dev` on the host. This Dockerfile is for deploying the built app.
 
-FROM node:20-alpine AS base
+FROM node:26-alpine AS base
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
