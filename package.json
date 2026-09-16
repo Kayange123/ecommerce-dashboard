@@ -52,7 +52,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-hook-form": "^7.88.0",
-    "react-hot-toast": "^2.4.1",
+    "react-hot-toast": "^2.6.0",
     "recharts": "^3.10.1",
     "stripe": "^13.5.0",
     "tailwind-merge": "^1.14.0",
