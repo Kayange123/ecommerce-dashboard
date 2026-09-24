@@ -55,3 +55,17 @@ _for_ Postgres, but a database migration is exactly the kind of
 irreversible, high-blast-radius change that needs a written RFC and
 maintainer sign-off before any code moves, not something to decide inside
 an unrelated PR.
+
+## Prisma version ceiling on MongoDB
+
+This app is on Prisma 6.x deliberately, not just because that's what
+hasn't been upgraded yet: **Prisma 7 removed MongoDB support entirely**,
+and Prisma 8's MongoDB support uses a different config model
+(`prisma.config.ts` + `@prisma/orm-mongo`, not `schema.prisma`'s
+`datasource`) and a different query API (a chained builder, not
+`prisma.model.findMany({ where })`) — every call site in this app would
+need rewriting, not just the dependency version. See
+[docs/rfcs/RFC-002-prisma-8-mongodb-migration.md](../rfcs/RFC-002-prisma-8-mongodb-migration.md).
+`dependabot.yml` ignores major-version bumps for `prisma`/`@prisma/client`
+so it doesn't keep re-suggesting an upgrade that's impossible on this
+database as configured today.
