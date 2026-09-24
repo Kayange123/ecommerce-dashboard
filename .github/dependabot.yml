@@ -9,6 +9,15 @@ updates:
       radix-ui:
         patterns:
           - "@radix-ui/*"
+    ignore:
+      # Prisma 7 dropped MongoDB support entirely; Prisma 8's MongoDB
+      # support is a different query API and config model, not a drop-in
+      # bump — see docs/rfcs/RFC-002-prisma-8-mongodb-migration.md. Stay
+      # on the latest 6.x until that RFC is actually taken up.
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore(deps)"
 

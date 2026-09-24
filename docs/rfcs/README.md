@@ -64,3 +64,4 @@ they don't block starting the work.
 ## Existing RFCs
 
 - [RFC-001: PostgreSQL migration](RFC-001-postgresql-migration.md) — Draft.
+- [RFC-002: Prisma 8 MongoDB migration](RFC-002-prisma-8-mongodb-migration.md) — Draft.

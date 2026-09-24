@@ -75,6 +75,19 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Clerk middleware checks as the previous Clerk commit — still redirect
   to `/sign-in`, still return `401` from the app's own check on
   `/api/stores`, unchanged after this much larger jump.
+- Bumped Prisma/`@prisma/client` 5.2.0 → 6.19.3. **Stopped there
+  deliberately**: Prisma 7 dropped MongoDB support entirely, and Prisma
+  8's MongoDB support replaces the schema-driven query API with a
+  different chained-builder API and config model — not a routine bump.
+  See `docs/rfcs/RFC-002-prisma-8-mongodb-migration.md`. Added
+  `prisma.config.ts` to replace the now-deprecated `package.json#prisma`
+  seed config; its mere presence disables Prisma's automatic `.env`
+  loading, so it explicitly `import`s `dotenv/config` — confirmed via a
+  real `prisma db push` against a `.env` file that this was necessary,
+  not just theoretical. `dependabot.yml` now ignores major-version
+  updates for `prisma`/`@prisma/client` so it stops re-suggesting the
+  impossible-for-MongoDB Prisma 7 bump. Verified end-to-end against a
+  real MongoDB replica set (`db push`, seed, idempotent re-seed, reset).
 
 ### Added
 
