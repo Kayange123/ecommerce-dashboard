@@ -18,6 +18,13 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "@prisma/client"
         update-types: ["version-update:semver-major"]
+      # TypeScript 7's programmatic/Language Service API (what
+      # @typescript-eslint and Next.js's own internal type-checking both
+      # depend on) doesn't ship until 7.1 (~Nov 2026) — 7.0 is a native
+      # Go-ported compiler with no JS-consumable API yet. Remove this
+      # once 7.1 is out and this has actually been re-evaluated.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore(deps)"
 

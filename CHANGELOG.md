@@ -88,6 +88,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   updates for `prisma`/`@prisma/client` so it stops re-suggesting the
   impossible-for-MongoDB Prisma 7 bump. Verified end-to-end against a
   real MongoDB replica set (`db push`, seed, idempotent re-seed, reset).
+- Bumped TypeScript 5.2.2 → 6.0.3 and `tsconfig.json`'s `target` es5 →
+  es2017 (TS6 treats ES5 as vanishing-legacy; TS7 drops it entirely).
+  Surfaced and fixed a real, previously-silent gap: TS6's stricter
+  side-effect-import checking (error TS2882) caught that Next.js's own
+  shipped types never declared plain `*.css` imports (only
+  `*.module.css`) — added `global.d.ts` with `declare module "*.css"`.
+  **Deliberately not going to TypeScript 7**: its programmatic API (what
+  `@typescript-eslint`/`eslint-config-next` and Next's own type-checking
+  depend on) doesn't ship until 7.1 (~Nov 2026) — 7.0 is a Go-ported
+  compiler with no JS-consumable API yet. `dependabot.yml` ignores
+  typescript major-version bumps until that's re-evaluated.
 
 ### Added
 
