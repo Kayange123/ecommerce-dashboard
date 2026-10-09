@@ -176,6 +176,21 @@ npm ci` against the merged result failed with ERESOLVE:
   as the combined, from-scratch state actually resolving; `dependabot.yml`
   now ignores `eslint` major-version bumps until `eslint-config-next`
   catches up.
+- Merged small, CI-verified patch/minor bumps: the Radix UI group (8
+  packages), `tsx`, `@types/node`.
+- Declined `stripe` 13.5.0 → 23.0.0 (ten majors) and `tailwindcss`
+  3.3.3 → 4.3.3 as routine Dependabot merges. Stripe: real behavioral
+  changes along the way (v21+ moves monetary fields to a
+  `Stripe.Decimal` type; v23 changes webhook tolerance/connection-error
+  behavior) mean this needs the same one-major-at-a-time, real-HTTP-
+  verified treatment as the Next.js/Clerk upgrades above — tracked as
+  good-first-issues.md #9, deliberately without a `dependabot.yml`
+  ignore rule, since Stripe ships a new major with every API version
+  release and blanket-ignoring risks silently falling behind
+  indefinitely on a payments-critical SDK. Tailwind 4: a full engine
+  rewrite (CSS-first config), already flagged in the original audit as
+  its own deliberate future decision — `dependabot.yml` does ignore
+  this one, since it's a settled scope decision, not an open question.
 
 ### Added
 

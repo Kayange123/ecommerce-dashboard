@@ -35,6 +35,13 @@ updates:
       # dependency.
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
+      # Tailwind 4 is a full engine rewrite (CSS-first config, not
+      # primarily tailwind.config.js-driven) -- a deliberate, scoped
+      # future decision, not a routine bump. See CHANGELOG.md and
+      # docs/audits/current-state.md. Remove once that work is actually
+      # taken up.
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore(deps)"
 
