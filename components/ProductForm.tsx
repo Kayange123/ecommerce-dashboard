@@ -197,7 +197,17 @@ const ProductForm = ({
                 <FormItem>
                   <FormLabel>Price</FormLabel>
                   <FormControl>
-                    <Input disabled={isLoading} placeholder="10.2" {...field} />
+                    {/* z.coerce.number()'s input type is `unknown` (it
+                    accepts any raw value before coercion), which doesn't
+                    match <Input>'s value prop — react-hook-form's field
+                    value for a controlled text input is always a string
+                    or number in practice. */}
+                    <Input
+                      disabled={isLoading}
+                      placeholder="10.2"
+                      {...field}
+                      value={field.value as string | number}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

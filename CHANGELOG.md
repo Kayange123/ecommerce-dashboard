@@ -143,6 +143,20 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   signed-out-redirect Docker check from the Next 16 commit against v7
   with the corrected env vars — same correct behavior. See
   `docs/architecture/authentication.md`.
+- Bumped `zod` 3.25.76 → 4.6.5. Confirmed via grep this app's schemas
+  (one per `*Form.tsx` component, plus `storeModal.tsx`) use none of
+  v4's removed/changed APIs (no `.optional()+.default()` combinations,
+  no `errorMap`/`required_error`/`invalid_type_error`, no `z.record()`,
+  no deprecated string-format methods, no `.deepPartial()`/
+  `.nonstrict()`) — the only non-trivial schema is `ProductForm.tsx`'s,
+  already handled by the `z.input` fix from the `@hookform/resolvers`
+  bump. Fixed one new real type error: `z.coerce.number()`'s input type
+  is `unknown` (accepts anything pre-coercion), which doesn't match
+  `<Input value>`'s prop type — added an explicit
+  `value={field.value as string | number}` cast at that one call site
+  rather than changing the schema-wide `z.input` typing choice.
+  Verified: typecheck, all 27 tests, lint, build, and a full `docker
+build` all pass.
 
 ### Added
 
