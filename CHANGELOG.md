@@ -126,6 +126,23 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   for the full story — a real deployment following `.env.example` is
   unaffected, but this was worth tracking down rather than assuming
   green typecheck/test/lint/build meant the auth redirect still worked.
+- Bumped `@clerk/nextjs` 6.39.6 → 7.9.13 (peer range confirmed to cover
+  Next 16.4.0 and React 19.3.0 despite an oddly-narrow-looking upper
+  bound in the published range — resolved cleanly, no ERESOLVE).
+  Confirmed via grep that this app doesn't use any of v7's other
+  breaking API changes (`<SignedIn>`/`<SignedOut>`/`<Protect>`,
+  `useSignIn`/`useSignUp`, `handleRedirectCallback`, `getToken()`) —
+  only two real breaking changes applied here: `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL`/
+  `_AFTER_SIGN_UP_URL` renamed to `_SIGN_IN_FALLBACK_REDIRECT_URL`/
+  `_SIGN_UP_FALLBACK_REDIRECT_URL` (old names now silently ignored,
+  confirmed by reading `@clerk/nextjs`'s own env-merge source —
+  `.env.example` updated), and `<UserButton afterSignOutUrl>` removed
+  in favor of a `<ClerkProvider afterSignOutUrl>`-level-only option
+  (moved in `app/layout.tsx`, removed from both `<UserButton>` call
+  sites in `components/MainNav.tsx`). Re-verified the full
+  signed-out-redirect Docker check from the Next 16 commit against v7
+  with the corrected env vars — same correct behavior. See
+  `docs/architecture/authentication.md`.
 
 ### Added
 

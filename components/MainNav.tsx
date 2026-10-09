@@ -75,7 +75,7 @@ const MainNav = ({
             </Link>
           ))}
           <div className="mx-auto flex items-center justify-center space-x-4">
-            <UserButton afterSignOutUrl="/" />
+            <UserButton />
           </div>
         </div>
         <div className="lg:hidden">
@@ -95,7 +95,7 @@ const MainNav = ({
                   <IconButton icon={<X size={20} />} onClick={onClose} />
                 </div>
                 <div className="mx-auto flex items-center justify-center space-x-4">
-                  <UserButton afterSignOutUrl="/" />
+                  <UserButton />
                 </div>
                 <div className="mt-10 flex w-full flex-col items-center space-y-3">
                   {routes.map((route) => (

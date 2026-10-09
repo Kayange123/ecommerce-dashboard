@@ -5,13 +5,16 @@ session management.
 
 ## How it's wired in
 
-- `proxy.ts` uses Clerk v6's `clerkMiddleware` + `createRouteMatcher`
-  (v4's `authMiddleware` was removed in v6). Unlike v4 — which protected
-  everything _except_ `publicRoutes` by default — v6 protects nothing by
-  default; the middleware explicitly calls `auth.protect()` for every
-  route that doesn't match `isPublicRoute` (`/sign-in`, `/sign-up`,
-  `/api/*`), reproducing v4's old behavior deliberately rather than
-  accidentally inheriting v6's more permissive default.
+- `proxy.ts` uses Clerk's `clerkMiddleware` + `createRouteMatcher`
+  (v4's `authMiddleware` was removed in v6; `createRouteMatcher` itself
+  is deprecated as of v7 in favor of per-route checks, but still works —
+  see [ROADMAP.md](../../ROADMAP.md)-adjacent follow-up, not done yet).
+  Unlike v4 — which protected everything _except_ `publicRoutes` by
+  default — v6+ protects nothing by default; the middleware explicitly
+  calls `auth.protect()` for every route that doesn't match
+  `isPublicRoute` (`/sign-in`, `/sign-up`, `/api/*`), reproducing v4's
+  old behavior deliberately rather than accidentally inheriting the
+  more permissive default.
 - `/api/*` stays a matched "public route" for Clerk's own purposes, same
   as before — Clerk performs **no enforcement** on API routes. Every
   route handler under `app/api/` calls `await auth()` directly (async as
@@ -55,6 +58,20 @@ session management.
   nothing breaks — but don't test this app's auth redirect behavior
   with an abbreviated env var set that skips them, the way an early
   pass at this exact check did.
+- **Clerk v7 (Core 3) renamed the sign-in/sign-up redirect env vars**:
+  `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL`/`_AFTER_SIGN_UP_URL` are gone —
+  confirmed by reading `@clerk/nextjs`'s own
+  `mergeNextClerkPropsWithEnv` source, which no longer references them
+  at all (so they'd be silently ignored, not erroring) — replaced by
+  `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL`/
+  `_SIGN_UP_FALLBACK_REDIRECT_URL` (`.env.example` updated). Also,
+  `<UserButton afterSignOutUrl="..." />` no longer exists on
+  `UserButtonProps` — `afterSignOutUrl` moved to being a
+  `<ClerkProvider>`-level-only option (`app/layout.tsx`); confirmed by
+  reading `@clerk/shared`'s type definitions, not by guessing from the
+  TypeScript error. Re-ran the full signed-out-redirect Docker check
+  from above against v7 with the corrected env var names — same
+  correct `/sign-in` redirect, same `401` from `/api/stores`.
 
 ## Consequence for new code
 
