@@ -20,6 +20,7 @@
 # misc
 .DS_Store
 *.pem
+.claude-flow/
 
 # debug
 npm-debug.log*
