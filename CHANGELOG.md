@@ -167,6 +167,15 @@ build` all pass.
   redirect checks used for the Clerk/Next commits (all still correct),
   and confirmed no OpenSSL-detection warning in the logs (one had
   appeared on the original `node:20-alpine`).
+- Merged, then immediately reverted, `eslint` 9.39.5 → 10.12.0.
+  Dependabot's own PR check passed, but a clean `rm -rf node_modules &&
+npm ci` against the merged result failed with ERESOLVE:
+  `eslint-config-next@16.4.0` bundles `eslint-plugin-import@2.32.0`,
+  whose peer range caps at `eslint: ^9` — ESLint 10 doesn't install
+  cleanly here yet. A per-PR CI check passing is not the same guarantee
+  as the combined, from-scratch state actually resolving; `dependabot.yml`
+  now ignores `eslint` major-version bumps until `eslint-config-next`
+  catches up.
 
 ### Added
 

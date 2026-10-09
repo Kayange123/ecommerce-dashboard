@@ -25,6 +25,16 @@ updates:
       # once 7.1 is out and this has actually been re-evaluated.
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+      # eslint-config-next@16.4.0 (latest as of writing) bundles
+      # eslint-plugin-import@2.32.0, whose peer range caps at
+      # `eslint: ^9` -- ESLint 10 genuinely doesn't install cleanly
+      # under `npm ci` yet (confirmed the hard way: the individual PR's
+      # own CI check passed, but `npm ci` against the combined lockfile
+      # failed with ERESOLVE -- merged and had to be reverted). Remove
+      # this once eslint-config-next bumps its own eslint-plugin-import
+      # dependency.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore(deps)"
 
