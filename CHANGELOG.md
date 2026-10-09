@@ -157,6 +157,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   rather than changing the schema-wide `z.input` typing choice.
   Verified: typecheck, all 27 tests, lint, build, and a full `docker
 build` all pass.
+- Bumped the Dockerfile's base image `node:20-alpine` → `node:24-alpine`
+  — `24.x`, not Dependabot's suggested `25-alpine`, to match the
+  `engines.node: "24.x"` already pinned in `package.json` for Vercel/CI
+  rather than introduce a fourth different Node version across
+  environments. CI doesn't build the Docker image at all, so this
+  needed its own real verification, not just a green Dependabot check:
+  built the image, ran the container, re-ran the same signed-out-
+  redirect checks used for the Clerk/Next commits (all still correct),
+  and confirmed no OpenSSL-detection warning in the logs (one had
+  appeared on the original `node:20-alpine`).
 
 ### Added
 
