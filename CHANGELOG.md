@@ -25,9 +25,39 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   response) no longer re-marks an order paid or re-archives its products.
   New `ProcessedWebhookEvent` model, keyed by Stripe's `event.id`. Added
   `tests/integration/webhook-idempotency.test.ts`.
+- Investigated a `dependency-review` CI failure on the `tailwindcss`
+  3.3.3 → 3.4.19 Dependabot PR: a transitive `braces` dependency (via
+  `tailwindcss` → `micromatch`) carries two advisories,
+  [GHSA-grv7-fg5c-xmjg](https://github.com/advisories/GHSA-grv7-fg5c-xmjg)
+  (`<3.0.3`) and [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)
+  (`<=3.0.3`, no published fix exists yet as of 2026-10-09). Confirmed via
+  `npm audit` that `develop` already carried both at `braces@3.0.2`
+  _before_ this PR — merging it actually resolves the first advisory
+  (bumps to `3.0.3`) and doesn't introduce the second, which remains
+  open regardless of this repo's own choices pending an upstream fix.
+  Merged the PR; the `dependency-review` check will keep failing on the
+  still-open advisory until `braces` ships a fix or Tailwind 4 (already
+  a deliberate deferral — see `Changed` below) removes this chain
+  entirely. `develop` has no branch protection, so this isn't bypassing
+  a required check — documenting it here so it isn't mistaken for an
+  unreviewed merge.
 
 ### Changed
 
+- Bumped `cloudinary` 1.40.0 → 2.11.0 (Dependabot #38). Verified the
+  app only imports `next-cloudinary`'s `CldUploadWidget`
+  (`components/ui/ImageUpload.tsx`) — the `cloudinary` SDK package
+  itself has no direct import anywhere in `app`/`components`/`lib`, so
+  this major bump has no behavioral surface in this codebase today.
+- Closed Dependabot PR #40 (`@tanstack/react-table` 8.9.7 → 9.2.6)
+  rather than merging: confirmed via a real CI typecheck failure that
+  v9 is a full API rewrite (`useReactTable`, `getCoreRowModel`,
+  `getPaginationRowModel`, `getFilteredRowModel` all removed;
+  `ColumnDef` now takes 2–3 type arguments), breaking every
+  `components/*/Columns.tsx` and `components/ui/dataTable.tsx`. Added a
+  `dependabot.yml` ignore rule and
+  `docs/contributing/good-first-issues.md` #6 to track the migration as
+  deliberate future work.
 - Bumped Next.js 13.4.19 → 13.5.11 (prerequisite for the Clerk upgrade
   below — same major, no breaking changes).
 - Migrated Clerk v4.23.3 → v6.39.6: `middleware.ts` rewritten for

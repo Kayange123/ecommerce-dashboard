@@ -42,6 +42,15 @@ updates:
       # taken up.
       - dependency-name: "tailwindcss"
         update-types: ["version-update:semver-major"]
+      # @tanstack/react-table v9 is a full API rewrite: useReactTable,
+      # getCoreRowModel/getPaginationRowModel/getFilteredRowModel are gone,
+      # ColumnDef's generic signature changed shape. Breaks every
+      # components/*/Columns.tsx and components/ui/dataTable.tsx (confirmed
+      # via a real CI typecheck failure on PR #40, closed rather than
+      # merged). Needs a deliberate migration, not an auto-merge — see
+      # docs/contributing/good-first-issues.md. Remove once that's done.
+      - dependency-name: "@tanstack/react-table"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore(deps)"
 
