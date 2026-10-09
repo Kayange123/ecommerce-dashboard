@@ -37,7 +37,7 @@ See [docs/architecture/authentication.md](docs/architecture/authentication.md)
 and [docs/architecture/authorization.md](docs/architecture/authorization.md)
 for detail. In short:
 
-- **Authentication** is Clerk. `middleware.ts` marks all `/api/*` routes as
+- **Authentication** is Clerk. `proxy.ts` marks all `/api/*` routes as
   Clerk-public, so Clerk itself performs no enforcement there — every route
   handler calls `auth()` and checks `userId` itself.
 - **Authorization** today is one rule: a `Store` has exactly one owning

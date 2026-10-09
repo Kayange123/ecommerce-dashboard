@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useIsMounted } from "@/hooks/useIsMounted";
 import { Modal } from "../ui/modal";
 import { Button } from "../ui/button";
 
@@ -16,11 +16,7 @@ const AlertModal = ({
   onClose,
   onConfirm,
 }: AlertModalProps) => {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const isMounted = useIsMounted();
 
   if (!isMounted) {
     return null;

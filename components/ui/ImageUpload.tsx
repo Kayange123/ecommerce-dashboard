@@ -1,7 +1,5 @@
 "use client";
 
-import { redirect } from "next/navigation";
-import { useState, useEffect } from "react";
 import { CldUploadWidget } from "next-cloudinary";
 import { Button } from "./button";
 import { ImagePlus, Trash } from "lucide-react";
@@ -19,13 +17,6 @@ const ImageUpload = ({
   onChange,
   onRemove,
 }: ImageUploadProps) => {
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  //if(!isMounted) redirect('/');
-
   const onUpload = (res: any) => {
     onChange(res?.info?.secure_url);
   };

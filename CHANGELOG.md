@@ -99,6 +99,33 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   depend on) doesn't ship until 7.1 (~Nov 2026) — 7.0 is a Go-ported
   compiler with no JS-consumable API yet. `dependabot.yml` ignores
   typescript major-version bumps until that's re-evaluated.
+- Bumped Next.js 15.5.25 → 16.4.0. `middleware.ts` renamed to `proxy.ts`
+  (Next 16's new convention for the same `clerkMiddleware` code — see
+  `docs/architecture/authentication.md`). `next lint` was removed
+  entirely; migrated to the ESLint CLI with a flat `eslint.config.mjs`,
+  deliberately matching the old `.eslintrc.json`'s exact ruleset
+  (`eslint-config-next/core-web-vitals` only) rather than also adopting
+  the newer, much stricter `eslint-config-next/typescript` preset, which
+  surfaced ~75 unrelated pre-existing findings — that's a deliberate
+  future cleanup, not an incidental part of this bump. Fixed 4 real
+  lint errors from `eslint-config-next`'s own updated React Hooks rules
+  (not from the stricter preset): a `setState`-in-`useEffect`
+  "is this mounted" pattern repeated in 4 files, replaced with one
+  shared `hooks/useIsMounted.ts` using `useSyncExternalStore` (avoids
+  the extra render pass the old pattern caused); one of the four
+  (`components/ui/ImageUpload.tsx`) had the pattern as fully dead code
+  (its only use was already commented out) and was just deleted outright.
+  **Verified behaviorally, and glad it was**: built the Docker image and
+  hit the running container for the same signed-out-redirect check used
+  for the Clerk v6 migration. With an abbreviated env var set (no
+  `NEXT_PUBLIC_CLERK_SIGN_IN_URL` etc.), the redirect went to a
+  Clerk-hosted Account Portal URL instead of this app's own `/sign-in` —
+  matching a [known upstream Clerk issue](https://github.com/clerk/javascript/issues/8302)
+  on Next 16's proxy. Setting those vars (which `.env.example` already
+  does, pre-filled) fixed it. See `docs/architecture/authentication.md`
+  for the full story — a real deployment following `.env.example` is
+  unaffected, but this was worth tracking down rather than assuming
+  green typecheck/test/lint/build meant the auth redirect still worked.
 
 ### Added
 

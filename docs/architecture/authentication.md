@@ -5,7 +5,7 @@ session management.
 
 ## How it's wired in
 
-- `middleware.ts` uses Clerk v6's `clerkMiddleware` + `createRouteMatcher`
+- `proxy.ts` uses Clerk v6's `clerkMiddleware` + `createRouteMatcher`
   (v4's `authMiddleware` was removed in v6). Unlike v4 — which protected
   everything _except_ `publicRoutes` by default — v6 protects nothing by
   default; the middleware explicitly calls `auth.protect()` for every
@@ -36,6 +36,25 @@ session management.
   boundary. What this _couldn't_ verify without a real Clerk application:
   actual sign-up/sign-in completing, since that needs Clerk's real
   backend, not just a well-formed key.
+- **`NEXT_PUBLIC_CLERK_SIGN_IN_URL` became load-bearing under Next.js
+  16's `proxy.ts` convention** (renamed from `middleware.ts` — same
+  `clerkMiddleware` code, see
+  [ARCHITECTURE.md](../../ARCHITECTURE.md)). Discovered by the same
+  Docker-container check above: omitting that env var (and
+  `SIGN_UP_URL`/`AFTER_SIGN_IN_URL`/`AFTER_SIGN_UP_URL`) made the
+  unauthenticated `/` redirect go to a Clerk-hosted Account Portal URL
+  (`https://<key-derived-subdomain>.accounts.dev/sign-in`) instead of
+  this app's own `/sign-in` page — the same failure mode as a
+  [known upstream Clerk issue](https://github.com/clerk/javascript/issues/8302)
+  on Next 16's proxy. Setting the var (as `.env.example` already does,
+  pre-filled, not blank) fixes it — confirmed by re-running the same
+  check with it set. Likely explanation: some implicit fallback
+  Clerk's older middleware integration had no longer resolves inside
+  Next 16's proxy execution context. Practical upshot: these vars were
+  always documented as required: with `.env.example` copied as-is,
+  nothing breaks — but don't test this app's auth redirect behavior
+  with an abbreviated env var set that skips them, the way an early
+  pass at this exact check did.
 
 ## Consequence for new code
 

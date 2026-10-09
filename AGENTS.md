@@ -105,7 +105,7 @@ generated up/down files for a reviewer to read. If you change
   multi-tenancy, and every route touching the changed model. Propose it,
   don't just make it, unless the task explicitly asked for a schema
   change.
-- **`middleware.ts`** — it currently marks all API routes as Clerk-public
+- **`proxy.ts`** — it currently marks all API routes as Clerk-public
   by design (every route hand-checks auth itself); don't "fix" this by
   making routes Clerk-protected without also auditing every route's
   current auth logic for what would break.
