@@ -20,6 +20,7 @@ export type CategoryColumn = {
   id: string;
   name: string;
   billboardLabel: string;
+  productCount: number;
   createdAt: string;
 };
 
@@ -77,6 +78,12 @@ export const CellAction = ({ data }: ICellAction) => {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         onConfirm={onDelete}
+        title={`Delete "${data.name}"?`}
+        description={
+          data.productCount > 0
+            ? `Used by ${data.productCount} ${data.productCount === 1 ? "product" : "products"}. This action cannot be undone.`
+            : "This action cannot be undone."
+        }
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

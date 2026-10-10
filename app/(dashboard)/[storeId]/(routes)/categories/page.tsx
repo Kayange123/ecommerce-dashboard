@@ -13,6 +13,9 @@ const CategoriesPage = async (props: {
     },
     include: {
       billboard: true,
+      _count: {
+        select: { products: true },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -23,6 +26,7 @@ const CategoriesPage = async (props: {
     id: category.id,
     name: category.name,
     billboardLabel: category.billboard.label,
+    productCount: category._count.products,
     createdAt: format(category.createdAt, "MMMM do, yyyy"),
   }));
   return (

@@ -1,8 +1,5 @@
-import BillboardForm from "@/components/BillboardForm";
 import CategoryForm from "@/components/CategoryForm";
 import prismadb from "@/lib/prismadb";
-import {} from "@prisma/client";
-import React from "react";
 
 const CategoryPage = async (props: {
   params: Promise<{ categoryId: string; storeId: string }>;
@@ -11,6 +8,11 @@ const CategoryPage = async (props: {
   const category = await prismadb.category.findFirst({
     where: {
       id: params.categoryId,
+    },
+    include: {
+      _count: {
+        select: { products: true },
+      },
     },
   });
   const billboards = await prismadb.billboard.findMany({
@@ -21,7 +23,11 @@ const CategoryPage = async (props: {
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8">
-        <CategoryForm billboards={billboards} initialData={category} />
+        <CategoryForm
+          billboards={billboards}
+          initialData={category}
+          productCount={category?._count.products ?? 0}
+        />
       </div>
     </div>
   );
