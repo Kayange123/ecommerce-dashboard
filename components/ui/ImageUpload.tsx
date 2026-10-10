@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { CldUploadWidget } from "next-cloudinary";
 import { Button } from "./button";
 import { ImagePlus, Trash } from "lucide-react";
 import Image from "next/image";
+import AlertModal from "../modals/alertModal";
 
 interface ImageUploadProps {
   onChange: (value: string) => void;
@@ -17,11 +19,25 @@ const ImageUpload = ({
   onChange,
   onRemove,
 }: ImageUploadProps) => {
+  const [pendingRemoval, setPendingRemoval] = useState<string | null>(null);
+
   const onUpload = (res: any) => {
     onChange(res?.info?.secure_url);
   };
+
   return (
     <div>
+      <AlertModal
+        isOpen={pendingRemoval !== null}
+        isLoading={false}
+        onClose={() => setPendingRemoval(null)}
+        onConfirm={() => {
+          onRemove(pendingRemoval as string);
+          setPendingRemoval(null);
+        }}
+        title="Remove this image?"
+        description="You'll need to upload it again if you change your mind."
+      />
       <div className="mb-4 flex items-center gap-5">
         {values?.map((url) => (
           <div
@@ -31,7 +47,7 @@ const ImageUpload = ({
             <div className="absolute right-2 top-2 z-10">
               <Button
                 type="button"
-                onClick={() => onRemove(url)}
+                onClick={() => setPendingRemoval(url)}
                 size="icon"
                 variant="destructive"
               >
