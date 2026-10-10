@@ -1,6 +1,6 @@
 import prismadb from "@/lib/prismadb";
 
-interface IGraphData {
+export interface IGraphData {
   name: string;
   total: number;
 }
