@@ -4,7 +4,7 @@ import { useState } from "react";
 import { z } from "zod";
 import Heading from "@/components/ui/Heading";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { Tags, Trash } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,14 +35,19 @@ import {
 interface CategoryFormProps {
   initialData: Category | null;
   billboards: Billboard[];
+  productCount: number;
 }
 const formSchema = z.object({
-  billboardId: z.string().min(1),
-  name: z.string().min(3),
+  billboardId: z.string().min(1, { error: "Please select a billboard." }),
+  name: z.string().min(3, { error: "Name must be at least 3 characters." }),
 });
 type CategoryFormValues = z.infer<typeof formSchema>;
 
-const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
+const CategoryForm = ({
+  initialData,
+  billboards,
+  productCount,
+}: CategoryFormProps) => {
   const title = initialData ? "Edit Category" : "Create Category";
   const description = initialData
     ? "Edit a Category"
@@ -77,7 +82,7 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
       router.push(`/${params.storeId}/categories`);
       toast.success(toastMessage);
     } catch (error) {
-      toast.error("Failed to to save settings");
+      toast.error("Failed to save category.");
     } finally {
       setIsLoading(false);
     }
@@ -105,20 +110,30 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
         onClose={() => setIsOpen(false)}
         onConfirm={onDelete}
         isOpen={isOpen}
+        title={initialData ? `Delete "${initialData.name}"?` : undefined}
+        description={
+          productCount > 0
+            ? `Used by ${productCount} ${productCount === 1 ? "product" : "products"}. This action cannot be undone.`
+            : undefined
+        }
       />
-      <div className="flex items-center justify-between">
-        <Heading title={title} description={description} />
-        {initialData && (
-          <Button
-            disabled={isLoading}
-            variant="destructive"
-            onClick={() => setIsOpen(true)}
-            size="sm"
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      <Heading
+        icon={Tags}
+        title={title}
+        description={description}
+        action={
+          initialData && (
+            <Button
+              disabled={isLoading}
+              variant="destructive"
+              onClick={() => setIsOpen(true)}
+              size="sm"
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          )
+        }
+      />
       <Separator />
       <Form {...form}>
         <form
@@ -151,9 +166,9 @@ const CategoryForm = ({ initialData, billboards }: CategoryFormProps) => {
               name="billboardId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Bollboard ID</FormLabel>
+                  <FormLabel>Billboard</FormLabel>
                   <FormDescription>
-                    A category belongs to billboards
+                    A category belongs to a billboard
                   </FormDescription>
                   <Select
                     disabled={isLoading}

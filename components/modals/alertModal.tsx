@@ -8,6 +8,8 @@ interface AlertModalProps {
   onClose: () => void;
   onConfirm: () => void;
   isLoading: boolean;
+  title?: string;
+  description?: string;
 }
 
 const AlertModal = ({
@@ -15,6 +17,8 @@ const AlertModal = ({
   isOpen,
   onClose,
   onConfirm,
+  title = "Are you sure?",
+  description = "This action can not be undone",
 }: AlertModalProps) => {
   const isMounted = useIsMounted();
 
@@ -23,8 +27,8 @@ const AlertModal = ({
   }
   return (
     <Modal
-      title="Are you sure?"
-      description="This action can not be undone"
+      title={title}
+      description={description}
       isOpen={isOpen}
       onClose={onClose}
     >

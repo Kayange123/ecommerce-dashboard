@@ -26,12 +26,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey: string;
+  emptyState?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
+  emptyState,
 }: DataTableProps<TData, TValue>) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useReactTable({
@@ -45,6 +47,10 @@ export function DataTable<TData, TValue>({
       columnFilters,
     },
   });
+
+  if (data.length === 0 && emptyState) {
+    return <div className="py-4">{emptyState}</div>;
+  }
 
   return (
     <div>

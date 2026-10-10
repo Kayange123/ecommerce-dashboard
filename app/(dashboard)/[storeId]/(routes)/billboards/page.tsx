@@ -11,6 +11,11 @@ const BillboardsPage = async (props: {
     where: {
       storeId: params.storeId,
     },
+    include: {
+      _count: {
+        select: { categories: true },
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -20,6 +25,7 @@ const BillboardsPage = async (props: {
     (billboard) => ({
       id: billboard.id,
       label: billboard.label,
+      categoryCount: billboard._count.categories,
       createdAt: format(billboard.createdAt, "MMMM do, yyyy"),
     })
   );

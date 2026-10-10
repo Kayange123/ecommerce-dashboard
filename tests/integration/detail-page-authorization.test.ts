@@ -32,10 +32,26 @@ import ProductPage from "@/app/(dashboard)/[storeId]/(routes)/products/[productI
 // Each page's JSX shape is <div><div><ResourceForm initialData={...} /></div></div>.
 const formElement = (page: any) => page.props.children.props.children;
 
+// createFakeTable ignores Prisma's `include` option and returns rows as
+// seeded, so a `_count` the page code reads off an `include: { _count }`
+// query must be seeded directly here -- the real Prisma client populates
+// it from the actual relation, this just stands in for that.
 beforeEach(() => {
   fakeDb.billboard = createFakeTable([
-    { id: "bb-a1", storeId: "store-a", label: "A Billboard", imageUrl: "x" },
-    { id: "bb-b1", storeId: "store-b", label: "B Billboard", imageUrl: "x" },
+    {
+      id: "bb-a1",
+      storeId: "store-a",
+      label: "A Billboard",
+      imageUrl: "x",
+      _count: { categories: 0 },
+    },
+    {
+      id: "bb-b1",
+      storeId: "store-b",
+      label: "B Billboard",
+      imageUrl: "x",
+      _count: { categories: 0 },
+    },
   ]);
   fakeDb.category = createFakeTable([
     {
@@ -43,17 +59,31 @@ beforeEach(() => {
       storeId: "store-a",
       name: "A Category",
       billboardId: "bb-a1",
+      _count: { products: 0 },
     },
     {
       id: "cat-b1",
       storeId: "store-b",
       name: "B Category",
       billboardId: "bb-b1",
+      _count: { products: 0 },
     },
   ]);
   fakeDb.size = createFakeTable([
-    { id: "sz-a1", storeId: "store-a", name: "Small", value: "S" },
-    { id: "sz-b1", storeId: "store-b", name: "Small", value: "S" },
+    {
+      id: "sz-a1",
+      storeId: "store-a",
+      name: "Small",
+      value: "S",
+      _count: { products: 0 },
+    },
+    {
+      id: "sz-b1",
+      storeId: "store-b",
+      name: "Small",
+      value: "S",
+      _count: { products: 0 },
+    },
   ]);
   fakeDb.product = createFakeTable([
     { id: "pr-a1", storeId: "store-a", name: "A Product", price: 10 },

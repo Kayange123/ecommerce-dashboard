@@ -10,12 +10,20 @@ const BillboardPage = async (props: {
       id: params.billboardId,
       storeId: params.storeId,
     },
+    include: {
+      _count: {
+        select: { categories: true },
+      },
+    },
   });
 
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8">
-        <BillboardForm initialData={billboard} />
+        <BillboardForm
+          initialData={billboard}
+          categoryCount={billboard?._count.categories ?? 0}
+        />
       </div>
     </div>
   );

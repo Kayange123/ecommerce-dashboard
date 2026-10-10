@@ -1,7 +1,10 @@
-import React from "react";
+"use client";
+
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import type { IGraphData } from "@/actions/actions";
+
 interface OverviewProps {
-  data: any[];
+  data: IGraphData[];
 }
 const Overview = ({ data }: OverviewProps) => {
   return (
@@ -9,19 +12,19 @@ const Overview = ({ data }: OverviewProps) => {
       <BarChart data={data}>
         <XAxis
           dataKey="name"
-          stroke="#888888"
+          stroke="hsl(var(--muted-foreground))"
           fontSize={12}
           tickLine={false}
           axisLine={false}
         />
         <YAxis
-          stroke="#888888"
+          stroke="hsl(var(--muted-foreground))"
           fontSize={12}
           tickLine={false}
           axisLine={false}
           tickFormatter={(value) => `$${value}`}
         />
-        <Bar dataKey="total" fill="#3498db" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="total" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

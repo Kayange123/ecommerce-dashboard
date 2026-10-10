@@ -44,7 +44,7 @@ const StoreSwitcher = ({ className, items = [] }: StoreSwitcherProps) => {
   );
 
   const onStoreSelect = (store: { value: string; label: string }) => {
-    setIsOpen(true);
+    setIsOpen(false);
     router.push(`/${store.value}`);
   };
   return (
@@ -55,23 +55,24 @@ const StoreSwitcher = ({ className, items = [] }: StoreSwitcherProps) => {
           size="sm"
           role="combobox"
           aria-expanded={isOpen}
-          aria-label="select the store"
-          className={cn("w-[250px] justify-between", className)}
+          aria-label="Select a store"
+          className={cn("w-full justify-between", className)}
         >
           <StoreIcon className="mr-4 h-4 w-4" />
           {currentStore?.label}
           <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
+          <CommandInput placeholder="Search store.." />
           <CommandList>
-            <CommandInput placeholder="search store.." />
             <CommandEmpty>No store found</CommandEmpty>
             <CommandGroup heading="Available stores">
               {formattedItems.map((item) => (
                 <CommandItem
                   key={item.value}
+                  value={`${item.label} ${item.value}`}
                   onSelect={() => onStoreSelect(item)}
                   className="cursor-pointer text-sm"
                 >
@@ -88,11 +89,10 @@ const StoreSwitcher = ({ className, items = [] }: StoreSwitcherProps) => {
                 </CommandItem>
               ))}
             </CommandGroup>
-          </CommandList>
-          <CommandSeparator />
-          <CommandList>
+            <CommandSeparator />
             <CommandGroup>
               <CommandItem
+                value="create-store"
                 className="cursor-pointer"
                 onSelect={() => {
                   setIsOpen(false);
