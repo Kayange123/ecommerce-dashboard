@@ -1,5 +1,3 @@
-import { BillboardColumn } from "@/components/billboard/Columns";
-import BillboardClient from "@/components/billboard/client";
 import { SizeColumn } from "@/components/sizes/Columns";
 import SizeClient from "@/components/sizes/client";
 import prismadb from "@/lib/prismadb";
@@ -11,21 +9,27 @@ const SizesPage = async (props: { params: Promise<{ storeId: string }> }) => {
     where: {
       storeId: params.storeId,
     },
+    include: {
+      _count: {
+        select: { products: true },
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },
   });
 
-  const formattedBillboards: SizeColumn[] = sizes.map((size) => ({
+  const formattedSizes: SizeColumn[] = sizes.map((size) => ({
     id: size.id,
     name: size.name,
     value: size.value,
+    productCount: size._count.products,
     createdAt: format(size.createdAt, "MMMM do, yyyy"),
   }));
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <SizeClient data={formattedBillboards} />
+        <SizeClient data={formattedSizes} />
       </div>
     </div>
   );

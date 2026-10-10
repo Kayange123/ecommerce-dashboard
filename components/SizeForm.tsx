@@ -5,7 +5,7 @@ import { z } from "zod";
 import { Size } from "@prisma/client";
 import Heading from "@/components/ui/Heading";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { Ruler, Trash } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,18 +25,19 @@ import AlertModal from "./modals/alertModal";
 
 interface SizeFormProps {
   initialData: Size | null;
+  productCount: number;
 }
 const formSchema = z.object({
-  name: z.string().min(2),
-  value: z.string().min(1),
+  name: z.string().min(2, { error: "Name must be at least 2 characters." }),
+  value: z.string().min(1, { error: "Value is required." }),
 });
 type SizeFormValues = z.infer<typeof formSchema>;
 
-const SizeForm = ({ initialData }: SizeFormProps) => {
+const SizeForm = ({ initialData, productCount }: SizeFormProps) => {
   const title = initialData ? "Edit size" : "Create size";
-  const description = initialData ? "Edit a Size" : "Create a new size";
+  const description = initialData ? "Edit a size" : "Create a new size";
   const action = initialData ? "save changes" : "Create";
-  const toastMessage = initialData ? "Changes saved" : "size Created";
+  const toastMessage = initialData ? "Changes saved" : "Size created";
 
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -65,7 +66,7 @@ const SizeForm = ({ initialData }: SizeFormProps) => {
       router.push(`/${params.storeId}/sizes`);
       toast.success(toastMessage);
     } catch (error) {
-      toast.error("Failed to to save settings");
+      toast.error("Failed to save size.");
     } finally {
       setIsLoading(false);
     }
@@ -76,9 +77,9 @@ const SizeForm = ({ initialData }: SizeFormProps) => {
       await axios.delete(`/api/${params.storeId}/sizes/${params.sizeId}`);
       router.refresh();
       router.push(`/${params.storeId}/sizes`);
-      toast.success("size deleted!");
+      toast.success("Size deleted!");
     } catch (error) {
-      toast.error("You can't delete sizes with categories and products");
+      toast.error("You can't delete a size with products");
     } finally {
       setIsLoading(false);
       setIsOpen(false);
@@ -91,20 +92,30 @@ const SizeForm = ({ initialData }: SizeFormProps) => {
         onClose={() => setIsOpen(false)}
         onConfirm={onDelete}
         isOpen={isOpen}
+        title={initialData ? `Delete "${initialData.name}"?` : undefined}
+        description={
+          productCount > 0
+            ? `Used by ${productCount} ${productCount === 1 ? "product" : "products"}. This action cannot be undone.`
+            : undefined
+        }
       />
-      <div className="flex items-center justify-between">
-        <Heading title={title} description={description} />
-        {initialData && (
-          <Button
-            disabled={isLoading}
-            variant="destructive"
-            onClick={() => setIsOpen(true)}
-            size="sm"
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      <Heading
+        icon={Ruler}
+        title={title}
+        description={description}
+        action={
+          initialData && (
+            <Button
+              disabled={isLoading}
+              variant="destructive"
+              onClick={() => setIsOpen(true)}
+              size="sm"
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          )
+        }
+      />
       <Separator />
       <Form {...form}>
         <form

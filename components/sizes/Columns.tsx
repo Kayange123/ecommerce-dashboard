@@ -20,6 +20,7 @@ export type SizeColumn = {
   id: string;
   name: string;
   value: string;
+  productCount: number;
   createdAt: string;
 };
 
@@ -61,9 +62,9 @@ export const CellAction = ({ data }: ICellAction) => {
       setIsLoading(true);
       await axios.delete(`/api/${params.storeId}/sizes/${data.id}`);
       router.refresh();
-      toast.success("billboard deleted!");
+      toast.success("Size deleted!");
     } catch (error) {
-      toast.error("You can't delete sizes with  products");
+      toast.error("You can't delete a size with products");
     } finally {
       setIsLoading(false);
       setIsOpen(false);
@@ -76,6 +77,12 @@ export const CellAction = ({ data }: ICellAction) => {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         onConfirm={onDelete}
+        title={`Delete "${data.name}"?`}
+        description={
+          data.productCount > 0
+            ? `Used by ${data.productCount} ${data.productCount === 1 ? "product" : "products"}. This action cannot be undone.`
+            : "This action cannot be undone."
+        }
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
