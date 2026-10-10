@@ -5,6 +5,65 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### UI/UX redesign
+
+A full visual and navigation redesign, landed as a sequence of small,
+independently-verified commits (tokens → dark mode → sidebar shell →
+one resource at a time → dashboard home). Each commit passed the full
+`format:check`/`typecheck`/`lint`/`test`/`build` loop, and the whole
+sequence was re-verified end to end with a from-scratch `npm ci` plus
+the full loop one more time at the end.
+
+- **Design tokens**: `--primary`/`--ring`/new `--chart-1` moved from
+  near-black slate to indigo in both light and dark variants; every
+  other token (background, card, border, muted, `--accent`) stays
+  untouched — `--accent` deliberately excluded since shadcn's "default"
+  style uses it for neutral hover states (dropdown/command items, ghost
+  buttons), not brand color. Poppins now loads 400/500/600/700 via a
+  CSS variable wired into Tailwind's `fontFamily.sans`, instead of a
+  single hardcoded weight-500 `className` — `font-bold`/`font-semibold`
+  actually render differently from body text now.
+- **Dark mode**: `next-themes` added and wired up for the first time —
+  `darkMode: ["class"]` and `globals.css`'s `.dark` block had existed
+  since the original scaffold but nothing ever toggled the class. New
+  `ModeToggle` (Light/Dark/System) lives in the sidebar. `@clerk/themes`
+  makes `UserButton` and the sign-in/sign-up pages follow the toggle
+  too (Clerk v7's `appearance` prop is `{ theme: dark }`, not the v6-era
+  `{ baseTheme: dark }` — confirmed against the installed type defs).
+- **Sidebar navigation**: replaced the top bar (`Navbar.tsx`/
+  `MainNav.tsx`) with a fixed sidebar at `lg:`+ and an off-canvas
+  `Sheet` below it (new `ui/sheet.tsx`, Radix-based — retires
+  `MainNav`'s stray Headless UI dialog; `@headlessui/react` is now
+  unused and removed). Active-route matching changed from exact
+  `pathname` equality to `startsWith` (except Overview), fixing a real
+  bug where nested routes like `/products/new` never highlighted
+  "Products". Found and fixed three real bugs in `store-switcher.tsx`
+  while relocating it into the sidebar: the popover never closed after
+  picking a store, `CommandInput` was nested inside a `CommandList`
+  instead of being its sibling (broke keyboard nav to "Create store"),
+  and `CommandItem` had no explicit `value` (same-named stores would
+  collide in cmdk's matching).
+- **Per-resource polish**, applied to billboards, categories, products,
+  sizes, and orders: empty states on every list (good-first-issues.md
+  #1), loading skeletons via `loading.tsx` on every route (#8),
+  specific delete-confirmation copy naming the resource plus a real
+  dependent count where one exists — e.g. "Delete 'Summer Sale'? Used
+  by 3 categories" (#11), and normalized/custom zod v4 validation
+  messages replacing generic defaults and a few copy-paste copy bugs
+  (#2 — found along the way: a billboard-delete toast that said
+  "billboard deleted!" on the _size_ delete path, a doubled "Failed to
+  to save X" typo repeated across all five forms, "Bollboard ID").
+  Settings' delete-store confirmation composes a full sentence from
+  real counts across products/categories/billboards/sizes, since it's
+  the most consequential delete in the app.
+- **Dashboard home**: wired up the revenue chart, which fetched data
+  every load but never rendered — `Overview.tsx` was missing a `"use
+client"` directive, so Recharts couldn't render inside the server
+  component it was mounted in (#5). Stat-card grid is now responsive
+  (`grid-cols-1 sm:grid-cols-3`, was a fixed 3-column grid that never
+  stacked on narrow screens), and each stat icon sits in an accent
+  chip.
+
 ### Security
 
 - Fixed a cross-store authorization (IDOR) vulnerability in the billboards,
