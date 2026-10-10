@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.13",
+    "@clerk/themes": "^2.4.57",
     "@headlessui/react": "^2.2.10",
     "@hookform/resolvers": "^5.9.1",
     "@prisma/client": "^6.19.3",
@@ -51,6 +52,7 @@
     "lucide-react": "^1.52.0",
     "next": "^16.4.0",
     "next-cloudinary": "^6.19.3",
+    "next-themes": "^0.4.6",
     "postcss": "8.5.29",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
