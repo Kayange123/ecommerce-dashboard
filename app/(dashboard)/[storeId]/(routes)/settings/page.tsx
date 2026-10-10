@@ -22,12 +22,22 @@ const SettingPage = async (props: SettingPageProps) => {
       id: storeId,
       userId,
     },
+    include: {
+      _count: {
+        select: {
+          products: true,
+          categories: true,
+          billboards: true,
+          sizes: true,
+        },
+      },
+    },
   });
   if (!store) redirect("/");
   return (
     <div className="flex flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <SettingsForm initialData={store} />
+        <SettingsForm initialData={store} counts={store._count} />
       </div>
     </div>
   );
