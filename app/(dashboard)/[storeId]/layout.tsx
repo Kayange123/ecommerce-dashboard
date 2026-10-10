@@ -1,7 +1,9 @@
-import Navbar from "@/components/Navbar";
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+
+import { Sidebar } from "@/components/sidebar/sidebar";
+import { MobileSidebar } from "@/components/sidebar/mobile-sidebar";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -23,10 +25,17 @@ export default async function DashboardLayout(props: DashboardLayoutProps) {
   });
   if (!store) return redirect("/");
 
+  const stores = await prismadb.store.findMany({
+    where: {
+      userId,
+    },
+  });
+
   return (
-    <>
-      <Navbar />
-      {children}
-    </>
+    <div className="h-full">
+      <Sidebar storeId={params.storeId} stores={stores} />
+      <MobileSidebar storeId={params.storeId} stores={stores} />
+      <main className="lg:pl-64">{children}</main>
+    </div>
   );
 }
