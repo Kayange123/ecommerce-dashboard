@@ -11,6 +11,7 @@ const ProductPage = async (props: {
   const product = await prismadb.product.findFirst({
     where: {
       id: params.productId,
+      storeId: params.storeId,
     },
     include: {
       images: true,

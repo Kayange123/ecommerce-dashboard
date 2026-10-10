@@ -1,15 +1,14 @@
 import BillboardForm from "@/components/BillboardForm";
 import prismadb from "@/lib/prismadb";
-import {} from "@prisma/client";
-import React from "react";
 
 const BillboardPage = async (props: {
-  params: Promise<{ billboardId: string }>;
+  params: Promise<{ billboardId: string; storeId: string }>;
 }) => {
   const params = await props.params;
   const billboard = await prismadb.billboard.findFirst({
     where: {
       id: params.billboardId,
+      storeId: params.storeId,
     },
   });
 
