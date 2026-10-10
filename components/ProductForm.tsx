@@ -5,7 +5,7 @@ import { z } from "zod";
 import { Category, Image, Product, Size } from "@prisma/client";
 import Heading from "@/components/ui/Heading";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { Package, Trash } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,8 +43,8 @@ interface ProductFormProps {
     | null;
 }
 const formSchema = z.object({
-  name: z.string().min(1),
-  price: z.coerce.number(),
+  name: z.string().min(1, { error: "Product name is required." }),
+  price: z.coerce.number({ error: "Price must be a valid number." }),
   images: z.object({ url: z.string() }).array(),
   categoryId: z.string(),
   sizeId: z.string(),
@@ -102,7 +102,7 @@ const ProductForm = ({
       router.push(`/${params.storeId}/products`);
       toast.success(toastMessage);
     } catch (error) {
-      toast.error("Failed to to save product");
+      toast.error("Failed to save product.");
     } finally {
       setIsLoading(false);
     }
@@ -128,20 +128,26 @@ const ProductForm = ({
         onClose={() => setIsOpen(false)}
         onConfirm={onDelete}
         isOpen={isOpen}
+        title={initialData ? `Delete "${initialData.name}"?` : undefined}
+        description="This action cannot be undone."
       />
-      <div className="flex items-center justify-between">
-        <Heading title={title} description={description} />
-        {initialData && (
-          <Button
-            disabled={isLoading}
-            variant="destructive"
-            onClick={() => setIsOpen(true)}
-            size="sm"
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      <Heading
+        icon={Package}
+        title={title}
+        description={description}
+        action={
+          initialData && (
+            <Button
+              disabled={isLoading}
+              variant="destructive"
+              onClick={() => setIsOpen(true)}
+              size="sm"
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          )
+        }
+      />
       <Separator />
       <Form {...form}>
         <form

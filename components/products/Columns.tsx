@@ -96,6 +96,8 @@ export const CellAction = ({ data }: ICellAction) => {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         onConfirm={onDelete}
+        title={`Delete "${data.name}"?`}
+        description="This action cannot be undone."
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

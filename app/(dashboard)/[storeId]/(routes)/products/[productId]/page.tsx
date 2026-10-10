@@ -1,8 +1,5 @@
-import BillboardForm from "@/components/BillboardForm";
 import ProductForm from "@/components/ProductForm";
 import prismadb from "@/lib/prismadb";
-import {} from "@prisma/client";
-import React from "react";
 
 const ProductPage = async (props: {
   params: Promise<{ productId: string; storeId: string }>;

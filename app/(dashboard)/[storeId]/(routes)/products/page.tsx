@@ -1,9 +1,6 @@
-import { BillboardColumn } from "@/components/billboard/Columns";
-import BillboardClient from "@/components/billboard/client";
 import { ProductColumn } from "@/components/products/Columns";
 import ProductClient from "@/components/products/client";
 import prismadb from "@/lib/prismadb";
-import { priceFormat } from "@/lib/utils";
 import { format } from "date-fns";
 
 const ProductsPage = async (props: {
