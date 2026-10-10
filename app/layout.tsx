@@ -1,5 +1,6 @@
 import { ModalProvider } from "@/providers/modal-provider";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkThemedProvider } from "@/components/clerk-themed-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import ToastProvider from "@/providers/toast-provider";
@@ -24,14 +25,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider afterSignOutUrl="/">
-      <html lang="en">
-        <body className={poppins.variable}>
-          <ToastProvider />
-          <ModalProvider />
-          {children}
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={poppins.variable}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ClerkThemedProvider>
+            <ToastProvider />
+            <ModalProvider />
+            {children}
+          </ClerkThemedProvider>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }
