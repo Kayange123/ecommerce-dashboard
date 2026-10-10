@@ -19,6 +19,7 @@ import AlertModal from "../modals/alertModal";
 export type BillboardColumn = {
   id: string;
   label: string;
+  categoryCount: number;
   createdAt: string;
 };
 
@@ -71,6 +72,12 @@ export const CellAction = ({ data }: ICellAction) => {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         onConfirm={onDelete}
+        title={`Delete "${data.label}"?`}
+        description={
+          data.categoryCount > 0
+            ? `Used by ${data.categoryCount} ${data.categoryCount === 1 ? "category" : "categories"}. This action cannot be undone.`
+            : "This action cannot be undone."
+        }
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

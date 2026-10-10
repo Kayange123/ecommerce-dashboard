@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { z } from "zod";
-import { Billboard, Store } from "@prisma/client";
+import { Billboard } from "@prisma/client";
 import Heading from "@/components/ui/Heading";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { Image as ImageIcon, Trash } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,14 +26,15 @@ import ImageUpload from "./ui/ImageUpload";
 
 interface BillboardFormProps {
   initialData: Billboard | null;
+  categoryCount: number;
 }
 const formSchema = z.object({
-  imageUrl: z.string().min(1),
-  label: z.string().min(3),
+  imageUrl: z.string().min(1, { error: "A background image is required." }),
+  label: z.string().min(3, { error: "Label must be at least 3 characters." }),
 });
 type BillboardFormValues = z.infer<typeof formSchema>;
 
-const BillboardForm = ({ initialData }: BillboardFormProps) => {
+const BillboardForm = ({ initialData, categoryCount }: BillboardFormProps) => {
   const title = initialData ? "Edit billboard" : "Create billboard";
   const description = initialData
     ? "Edit a billboard"
@@ -68,7 +69,7 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
       router.push(`/${params.storeId}/billboards`);
       toast.success(toastMessage);
     } catch (error) {
-      toast.error("Failed to to save settings");
+      toast.error("Failed to save billboard.");
     } finally {
       setIsLoading(false);
     }
@@ -96,20 +97,30 @@ const BillboardForm = ({ initialData }: BillboardFormProps) => {
         onClose={() => setIsOpen(false)}
         onConfirm={onDelete}
         isOpen={isOpen}
+        title={initialData ? `Delete "${initialData.label}"?` : undefined}
+        description={
+          categoryCount > 0
+            ? `Used by ${categoryCount} ${categoryCount === 1 ? "category" : "categories"}. This action cannot be undone.`
+            : undefined
+        }
       />
-      <div className="flex items-center justify-between">
-        <Heading title={title} description={description} />
-        {initialData && (
-          <Button
-            disabled={isLoading}
-            variant="destructive"
-            onClick={() => setIsOpen(true)}
-            size="sm"
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      <Heading
+        icon={ImageIcon}
+        title={title}
+        description={description}
+        action={
+          initialData && (
+            <Button
+              disabled={isLoading}
+              variant="destructive"
+              onClick={() => setIsOpen(true)}
+              size="sm"
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          )
+        }
+      />
       <Separator />
       <Form {...form}>
         <form
