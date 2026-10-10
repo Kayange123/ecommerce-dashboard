@@ -6,7 +6,12 @@ import ToastProvider from "@/providers/toast-provider";
 
 import "./globals.css";
 
-const poppins = Poppins({ weight: "500", style: "normal", subsets: ["latin"] });
+const poppins = Poppins({
+  weight: ["400", "500", "600", "700"],
+  style: "normal",
+  subsets: ["latin"],
+  variable: "--font-poppins",
+});
 
 export const metadata: Metadata = {
   title: "Home - Admin Dashboard",
@@ -21,7 +26,7 @@ export default function RootLayout({
   return (
     <ClerkProvider afterSignOutUrl="/">
       <html lang="en">
-        <body className={poppins.className}>
+        <body className={poppins.variable}>
           <ToastProvider />
           <ModalProvider />
           {children}
