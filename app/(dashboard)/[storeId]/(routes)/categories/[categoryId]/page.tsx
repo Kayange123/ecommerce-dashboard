@@ -8,6 +8,7 @@ const CategoryPage = async (props: {
   const category = await prismadb.category.findFirst({
     where: {
       id: params.categoryId,
+      storeId: params.storeId,
     },
     include: {
       _count: {
