@@ -294,6 +294,9 @@ npm ci` against the merged result failed with ERESOLVE:
 
 ### Fixed
 
+- Checkout sent Stripe `price * 100` as a float (`19.99` →
+  `1998.9999999999998`), which Stripe rejects as a non-integer amount;
+  it's now rounded to whole minor units.
 - The dashboard revenue chart summed the same month across every year
   (January 2025 + January 2026 in one bar); it now covers the current
   calendar year only.

@@ -53,7 +53,9 @@ export async function POST(
           name: item.name,
           images: item.images.map((image) => image.url),
         },
-        unit_amount: Number(item.price) * 100,
+        // Stripe requires an integer amount in minor units; float math
+        // alone turns e.g. 19.99 into 1998.9999999999998.
+        unit_amount: Math.round(item.price * 100),
       },
       adjustable_quantity: {
         enabled: true,

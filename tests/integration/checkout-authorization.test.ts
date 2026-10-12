@@ -35,6 +35,13 @@ describe("cross-store authorization: checkout", () => {
         images: [],
       },
       {
+        id: "product-a2",
+        storeId: "store-a",
+        name: "A Priced Product",
+        price: 19.99,
+        images: [],
+      },
+      {
         id: "product-b1",
         storeId: "store-b",
         name: "B Product",
@@ -96,5 +103,15 @@ describe("cross-store authorization: checkout", () => {
       where: { orderId: fakeDb.order.rows()[0].id, productId: "product-a1" },
       data: { stripeLineItemId: "li_test_1" },
     });
+  });
+
+  it("sends Stripe an integer amount in minor units", async () => {
+    await POST(checkoutRequest(["product-a2"]), {
+      params: Promise.resolve({ storeId: "store-a" }),
+    });
+
+    const call = fakeStripe.checkout.sessions.create.mock.calls[0][0];
+    // 19.99 * 100 is 1998.9999999999998 in floating point.
+    expect(call.line_items[0].price_data.unit_amount).toBe(1999);
   });
 });
