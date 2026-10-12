@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createFakeTable } from "../helpers/fakePrisma";
 
 const { fakeDb } = vi.hoisted(() => ({ fakeDb: {} as Record<string, any> }));
@@ -87,6 +87,14 @@ describe("actions/actions.ts", () => {
   });
 
   describe("getGraphRevenue", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 5, 15));
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it("buckets revenue by month and multiplies by quantity", async () => {
       fakeDb.order = createFakeTable([
         order({
@@ -110,6 +118,29 @@ describe("actions/actions.ts", () => {
       expect(graph.find((m) => m.name === "Jan")?.total).toBe(25);
       expect(graph.find((m) => m.name === "Mar")?.total).toBe(100);
       expect(graph.find((m) => m.name === "Dec")?.total).toBe(0);
+    });
+
+    it("only counts the current year, not the same month in other years", async () => {
+      fakeDb.order = createFakeTable([
+        order({
+          id: "o1",
+          createdAt: new Date(2025, 0, 10),
+          orderItems: [item(1000, 1)], // last year's January — excluded
+        }),
+        order({
+          id: "o2",
+          createdAt: new Date(2026, 0, 10),
+          orderItems: [item(10, 1)],
+        }),
+        order({
+          id: "o3",
+          createdAt: new Date(2027, 0, 10),
+          orderItems: [item(500, 1)], // next year — excluded
+        }),
+      ]);
+
+      const graph = await getGraphRevenue("store-a");
+      expect(graph.find((m) => m.name === "Jan")?.total).toBe(10);
     });
   });
 });

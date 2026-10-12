@@ -16,7 +16,6 @@ const OrdersPage = async (props: { params: Promise<{ storeId: string }> }) => {
         },
       },
     },
-    take: 20,
     orderBy: {
       createdAt: "desc",
     },

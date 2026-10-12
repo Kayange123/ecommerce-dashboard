@@ -32,6 +32,23 @@ describe("cross-store authorization: checkout", () => {
         storeId: "store-a",
         name: "A Product",
         price: 10,
+        isArchived: false,
+        images: [],
+      },
+      {
+        id: "product-a2",
+        storeId: "store-a",
+        name: "A Priced Product",
+        price: 19.99,
+        isArchived: false,
+        images: [],
+      },
+      {
+        id: "product-a-sold",
+        storeId: "store-a",
+        name: "A Sold Product",
+        price: 10,
+        isArchived: true,
         images: [],
       },
       {
@@ -39,6 +56,7 @@ describe("cross-store authorization: checkout", () => {
         storeId: "store-b",
         name: "B Product",
         price: 20,
+        isArchived: false,
         images: [],
       },
     ]);
@@ -96,5 +114,42 @@ describe("cross-store authorization: checkout", () => {
       where: { orderId: fakeDb.order.rows()[0].id, productId: "product-a1" },
       data: { stripeLineItemId: "li_test_1" },
     });
+  });
+
+  it("rejects a checkout for an archived (already sold) product", async () => {
+    const res = await POST(checkoutRequest(["product-a-sold"]), {
+      params: Promise.resolve({ storeId: "store-a" }),
+    });
+
+    expect(res.status).toBe(400);
+    expect(fakeDb.order.rows()).toHaveLength(0);
+    expect(fakeStripe.checkout.sessions.create).not.toHaveBeenCalled();
+  });
+
+  it("sends Stripe an integer amount in minor units", async () => {
+    await POST(checkoutRequest(["product-a2"]), {
+      params: Promise.resolve({ storeId: "store-a" }),
+    });
+
+    const call = fakeStripe.checkout.sessions.create.mock.calls[0][0];
+    // 19.99 * 100 is 1998.9999999999998 in floating point.
+    expect(call.line_items[0].price_data.unit_amount).toBe(1999);
+  });
+
+  it.each([
+    ["a missing productIds", {}],
+    ["a non-array productIds", { productIds: "product-a1" }],
+    ["an empty productIds", { productIds: [] }],
+  ])("rejects %s with 400", async (_label, body) => {
+    const res = await POST(
+      new Request("http://localhost/api/store-a/checkout", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+      { params: Promise.resolve({ storeId: "store-a" }) }
+    );
+
+    expect(res.status).toBe(400);
+    expect(fakeDb.order.rows()).toHaveLength(0);
   });
 });
