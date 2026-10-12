@@ -297,6 +297,9 @@ npm ci` against the merged result failed with ERESOLVE:
 - The dashboard revenue chart summed the same month across every year
   (January 2025 + January 2026 in one bar); it now covers the current
   calendar year only.
+- The orders page silently showed only the 20 most recent orders with
+  no way to reach older ones; it now loads all of the store's orders
+  into the table's existing pagination.
 - Removed a copy-pasted "Billboard ID is required" error string from the
   product delete handler.
 - Removed the duplicate, unused `tailwind.config.ts` stub — `tailwind.config.js`
