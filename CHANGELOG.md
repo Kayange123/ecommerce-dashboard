@@ -298,6 +298,9 @@ npm ci` against the merged result failed with ERESOLVE:
   `1998.9999999999998`), which Stripe rejects as a non-integer amount;
   it's now rounded to whole minor units.
 - Checkout no longer accepts archived (already sold) products.
+- The Stripe webhook now acknowledges a `checkout.session.completed`
+  event with no matching order with `200` instead of throwing a `500`
+  that Stripe would retry indefinitely.
 - The dashboard revenue chart summed the same month across every year
   (January 2025 + January 2026 in one bar); it now covers the current
   calendar year only.
