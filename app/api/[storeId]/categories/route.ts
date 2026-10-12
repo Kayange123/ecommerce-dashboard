@@ -2,6 +2,7 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+import { checkCategoryReferences } from "@/lib/store-references";
 import { categoryBodySchema, parseBody } from "@/lib/validation";
 
 export async function POST(
@@ -28,6 +29,13 @@ export async function POST(
     });
     if (!storeByUserId)
       return new NextResponse("Unauthorized", { status: 403 });
+
+    const referenceError = await checkCategoryReferences(
+      params.storeId,
+      billboardId
+    );
+    if (referenceError)
+      return new NextResponse(referenceError, { status: 400 });
 
     const category = await prismadb.category.create({
       data: {

@@ -66,6 +66,12 @@ client"` directive, so Recharts couldn't render inside the server
 
 ### Security
 
+- Fixed cross-store _references_ in the products and categories APIs:
+  create/update verified the caller owned the store and the record being
+  changed, but accepted any `categoryId`/`sizeId` (products) or
+  `billboardId` (categories), so a store could be linked to another
+  store's records. These ids are now checked against the store in the
+  URL (`lib/store-references.ts`), with cross-store negative tests.
 - Product, category, and checkout request bodies are now validated
   server-side with zod (`lib/validation.ts`): non-positive or non-numeric
   prices, malformed JSON, and a non-array `productIds` now return `400`

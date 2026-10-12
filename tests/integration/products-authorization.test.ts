@@ -27,6 +27,14 @@ describe("cross-store authorization: products", () => {
       { id: "product-a1", storeId: "store-a", name: "A Product", price: 10 },
       { id: "product-b1", storeId: "store-b", name: "B Product", price: 20 },
     ]);
+    fakeDb.category = createFakeTable([
+      { id: "cat-1", storeId: "store-a", name: "A Category" },
+      { id: "cat-b", storeId: "store-b", name: "B Category" },
+    ]);
+    fakeDb.size = createFakeTable([
+      { id: "size-1", storeId: "store-a", name: "A Size" },
+      { id: "size-b", storeId: "store-b", name: "B Size" },
+    ]);
     vi.mocked(auth).mockResolvedValue({ userId: "user-a" } as any);
   });
 
@@ -114,6 +122,51 @@ describe("cross-store authorization: products", () => {
       body: JSON.stringify(body),
     });
   }
+
+  it("does not let a user attach another store's category to their own product", async () => {
+    const res = await PATCH(
+      patchRequest({ ...validBody, categoryId: "cat-b" }),
+      {
+        params: Promise.resolve({
+          storeId: "store-a",
+          productId: "product-a1",
+        }),
+      }
+    );
+
+    expect(res.status).toBe(400);
+    const untouched = await fakeDb.product.findFirst({
+      where: { id: "product-a1" },
+    });
+    expect(untouched.name).toBe("A Product");
+  });
+
+  it("does not let a user create a product with another store's size", async () => {
+    const res = await POST(postRequest({ ...validBody, sizeId: "size-b" }), {
+      params: Promise.resolve({ storeId: "store-a" }),
+    });
+
+    expect(res.status).toBe(400);
+    expect(fakeDb.product.rows()).toHaveLength(2);
+  });
+
+  it("does not let a user create a product with another store's category", async () => {
+    const res = await POST(postRequest({ ...validBody, categoryId: "cat-b" }), {
+      params: Promise.resolve({ storeId: "store-a" }),
+    });
+
+    expect(res.status).toBe(400);
+    expect(fakeDb.product.rows()).toHaveLength(2);
+  });
+
+  it("lets a user create a product with their own store's category and size", async () => {
+    const res = await POST(postRequest(validBody), {
+      params: Promise.resolve({ storeId: "store-a" }),
+    });
+
+    expect(res.status).toBe(200);
+    expect(fakeDb.product.rows()).toHaveLength(3);
+  });
 
   it.each([
     ["a negative price", { ...validBody, price: -5 }],

@@ -2,6 +2,7 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+import { checkCategoryReferences } from "@/lib/store-references";
 import { categoryBodySchema, parseBody } from "@/lib/validation";
 
 export async function PATCH(
@@ -34,6 +35,22 @@ export async function PATCH(
     });
     if (!storeByUserId)
       return new NextResponse("Unauthorized", { status: 403 });
+
+    const categoryByStoreId = await prismadb.category.findFirst({
+      where: {
+        id: params.categoryId,
+        storeId: params.storeId,
+      },
+    });
+    if (!categoryByStoreId)
+      return new NextResponse("Not Found", { status: 404 });
+
+    const referenceError = await checkCategoryReferences(
+      params.storeId,
+      billboardId
+    );
+    if (referenceError)
+      return new NextResponse(referenceError, { status: 400 });
 
     const category = await prismadb.category.updateMany({
       where: {

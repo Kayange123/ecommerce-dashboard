@@ -2,6 +2,7 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+import { checkProductReferences } from "@/lib/store-references";
 import { parseBody, productBodySchema } from "@/lib/validation";
 
 export async function PATCH(
@@ -38,6 +39,14 @@ export async function PATCH(
     });
     if (!productByStoreId)
       return new NextResponse("Not Found", { status: 404 });
+
+    const referenceError = await checkProductReferences(
+      params.storeId,
+      categoryId,
+      sizeId
+    );
+    if (referenceError)
+      return new NextResponse(referenceError, { status: 400 });
 
     await prismadb.product.update({
       where: {

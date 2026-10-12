@@ -2,6 +2,7 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+import { checkProductReferences } from "@/lib/store-references";
 import { parseBody, productBodySchema } from "@/lib/validation";
 
 export async function POST(
@@ -28,6 +29,14 @@ export async function POST(
     });
     if (!storeByUserId)
       return new NextResponse("Unauthorized", { status: 403 });
+
+    const referenceError = await checkProductReferences(
+      params.storeId,
+      categoryId,
+      sizeId
+    );
+    if (referenceError)
+      return new NextResponse(referenceError, { status: 400 });
 
     const product = await prismadb.product.create({
       data: {
