@@ -11,6 +11,7 @@ import {
   DELETE,
   PATCH,
 } from "@/app/api/[storeId]/categories/[categoryId]/route";
+import { POST } from "@/app/api/[storeId]/categories/route";
 
 describe("cross-store authorization: categories", () => {
   beforeEach(() => {
@@ -67,5 +68,17 @@ describe("cross-store authorization: categories", () => {
 
     expect(res.status).toBe(200);
     expect(fakeDb.category.rows()).toHaveLength(1);
+  });
+
+  it("rejects a malformed body with 400 rather than 500", async () => {
+    const res = await POST(
+      new Request("http://localhost/api/store-a/categories", {
+        method: "POST",
+        body: "not json",
+      }),
+      { params: Promise.resolve({ storeId: "store-a" }) }
+    );
+
+    expect(res.status).toBe(400);
   });
 });

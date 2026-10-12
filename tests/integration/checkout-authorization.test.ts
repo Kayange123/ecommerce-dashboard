@@ -135,4 +135,21 @@ describe("cross-store authorization: checkout", () => {
     // 19.99 * 100 is 1998.9999999999998 in floating point.
     expect(call.line_items[0].price_data.unit_amount).toBe(1999);
   });
+
+  it.each([
+    ["a missing productIds", {}],
+    ["a non-array productIds", { productIds: "product-a1" }],
+    ["an empty productIds", { productIds: [] }],
+  ])("rejects %s with 400", async (_label, body) => {
+    const res = await POST(
+      new Request("http://localhost/api/store-a/checkout", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+      { params: Promise.resolve({ storeId: "store-a" }) }
+    );
+
+    expect(res.status).toBe(400);
+    expect(fakeDb.order.rows()).toHaveLength(0);
+  });
 });

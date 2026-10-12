@@ -8,6 +8,7 @@ vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn() }));
 
 import { auth } from "@clerk/nextjs/server";
 import { DELETE, PATCH } from "@/app/api/[storeId]/products/[productId]/route";
+import { POST } from "@/app/api/[storeId]/products/route";
 
 function patchRequest(body: unknown) {
   return new Request("http://localhost/api/store-a/products/product-b1", {
@@ -97,5 +98,34 @@ describe("cross-store authorization: products", () => {
       where: { id: "product-a1" },
     });
     expect(updated.name).toBe("Renamed");
+  });
+
+  const validBody = {
+    name: "New Product",
+    price: 19.99,
+    categoryId: "cat-1",
+    sizeId: "size-1",
+    images: [{ url: "http://img.example/1.png" }],
+  };
+
+  function postRequest(body: unknown) {
+    return new Request("http://localhost/api/store-a/products", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  }
+
+  it.each([
+    ["a negative price", { ...validBody, price: -5 }],
+    ["a zero price", { ...validBody, price: 0 }],
+    ["a string price", { ...validBody, price: "10" }],
+    ["no images", { ...validBody, images: [] }],
+  ])("rejects %s with 400", async (_label, body) => {
+    const res = await POST(postRequest(body), {
+      params: Promise.resolve({ storeId: "store-a" }),
+    });
+
+    expect(res.status).toBe(400);
+    expect(fakeDb.product.rows()).toHaveLength(2);
   });
 });

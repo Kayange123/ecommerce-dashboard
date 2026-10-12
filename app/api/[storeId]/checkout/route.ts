@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import prismadb from "@/lib/prismadb";
 import { stripe } from "@/lib/stripe";
+import { checkoutBodySchema, parseBody } from "@/lib/validation";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*", // allow requests from any other domain
@@ -18,11 +19,11 @@ export async function POST(
   props: { params: Promise<{ storeId: string }> }
 ) {
   const params = await props.params;
-  const { productIds } = await req.json();
-
-  if (!productIds || productIds.length === 0) {
-    return new NextResponse("ProductIds are required", { status: 400 });
+  const parsed = await parseBody(req, checkoutBodySchema);
+  if (!parsed.success) {
+    return new NextResponse(parsed.error, { status: 400 });
   }
+  const { productIds } = parsed.data;
 
   const products = await prismadb.product.findMany({
     where: {

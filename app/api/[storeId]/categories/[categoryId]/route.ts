@@ -2,6 +2,8 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+import { categoryBodySchema, parseBody } from "@/lib/validation";
+
 export async function PATCH(
   req: Request,
   props: { params: Promise<{ storeId: string; categoryId: string }> }
@@ -9,17 +11,14 @@ export async function PATCH(
   const params = await props.params;
   try {
     const { userId } = await auth();
-    const body = await req.json();
-    const { name, billboardId } = body;
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
-    if (!name) {
-      return new NextResponse("Name is required", { status: 400 });
-    }
-    if (!billboardId) {
-      return new NextResponse("Billboard ID is required", { status: 400 });
-    }
+
+    const parsed = await parseBody(req, categoryBodySchema);
+    if (!parsed.success) return new NextResponse(parsed.error, { status: 400 });
+    const { name, billboardId } = parsed.data;
+
     if (!params.categoryId) {
       return new NextResponse("category ID is required", { status: 400 });
     }
@@ -50,7 +49,6 @@ export async function PATCH(
       return new NextResponse("Not Found", { status: 404 });
     return NextResponse.json(category);
   } catch (error) {
-    console.log("BILLBOARD_PATCH :", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

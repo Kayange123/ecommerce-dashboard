@@ -44,7 +44,9 @@ interface ProductFormProps {
 }
 const formSchema = z.object({
   name: z.string().min(1, { error: "Product name is required." }),
-  price: z.coerce.number({ error: "Price must be a valid number." }),
+  price: z.coerce
+    .number({ error: "Price must be a valid number." })
+    .positive({ error: "Price must be greater than 0." }),
   images: z.object({ url: z.string() }).array(),
   categoryId: z.string(),
   sizeId: z.string(),

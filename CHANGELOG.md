@@ -66,6 +66,10 @@ client"` directive, so Recharts couldn't render inside the server
 
 ### Security
 
+- Product, category, and checkout request bodies are now validated
+  server-side with zod (`lib/validation.ts`): non-positive or non-numeric
+  prices, malformed JSON, and a non-array `productIds` now return `400`
+  instead of being stored or surfacing as `500`.
 - Fixed a cross-store authorization (IDOR) vulnerability in the billboards,
   categories, sizes, and products APIs: `PATCH`/`DELETE` handlers verified
   the caller owned _some_ store but did not verify the target resource
