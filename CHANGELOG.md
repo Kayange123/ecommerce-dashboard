@@ -294,6 +294,9 @@ npm ci` against the merged result failed with ERESOLVE:
 
 ### Fixed
 
+- The dashboard revenue chart summed the same month across every year
+  (January 2025 + January 2026 in one bar); it now covers the current
+  calendar year only.
 - Removed a copy-pasted "Billboard ID is required" error string from the
   product delete handler.
 - Removed the duplicate, unused `tailwind.config.ts` stub — `tailwind.config.js`
