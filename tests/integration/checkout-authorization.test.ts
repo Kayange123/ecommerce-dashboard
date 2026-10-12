@@ -32,6 +32,7 @@ describe("cross-store authorization: checkout", () => {
         storeId: "store-a",
         name: "A Product",
         price: 10,
+        isArchived: false,
         images: [],
       },
       {
@@ -39,6 +40,15 @@ describe("cross-store authorization: checkout", () => {
         storeId: "store-a",
         name: "A Priced Product",
         price: 19.99,
+        isArchived: false,
+        images: [],
+      },
+      {
+        id: "product-a-sold",
+        storeId: "store-a",
+        name: "A Sold Product",
+        price: 10,
+        isArchived: true,
         images: [],
       },
       {
@@ -46,6 +56,7 @@ describe("cross-store authorization: checkout", () => {
         storeId: "store-b",
         name: "B Product",
         price: 20,
+        isArchived: false,
         images: [],
       },
     ]);
@@ -103,6 +114,16 @@ describe("cross-store authorization: checkout", () => {
       where: { orderId: fakeDb.order.rows()[0].id, productId: "product-a1" },
       data: { stripeLineItemId: "li_test_1" },
     });
+  });
+
+  it("rejects a checkout for an archived (already sold) product", async () => {
+    const res = await POST(checkoutRequest(["product-a-sold"]), {
+      params: Promise.resolve({ storeId: "store-a" }),
+    });
+
+    expect(res.status).toBe(400);
+    expect(fakeDb.order.rows()).toHaveLength(0);
+    expect(fakeStripe.checkout.sessions.create).not.toHaveBeenCalled();
   });
 
   it("sends Stripe an integer amount in minor units", async () => {

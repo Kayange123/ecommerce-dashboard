@@ -30,6 +30,10 @@ export async function POST(
         in: productIds,
       },
       storeId: params.storeId,
+      // Archived products are no longer for sale (today, purchase archives
+      // a product — see app/api/webhook/route.ts), so a stale cart
+      // mustn't be able to buy one again.
+      isArchived: false,
     },
     include: {
       images: true,
@@ -38,7 +42,7 @@ export async function POST(
 
   if (products.length !== new Set(productIds).size) {
     return new NextResponse(
-      "One or more products do not belong to this store",
+      "One or more products are unavailable in this store",
       { status: 400 }
     );
   }
