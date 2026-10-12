@@ -60,6 +60,21 @@ npm run db:migrate        # prisma db push — see "Database migration rules"
 npm run db:seed
 ```
 
+## Committing and pushing
+
+Follow `.claude/skills/commit/SKILL.md` and `.claude/skills/push/SKILL.md`
+(invocable in Claude Code as `/commit` and `/push`):
+
+- Always work on a separate `type/<issue>-short-description` branch,
+  never directly on `main` or `develop`.
+- Fine-grained Conventional Commits: one logical change per commit, each
+  with its tests and CHANGELOG bullet, each passing the gate above.
+- Every commit refers to a GitHub issue (`Refs #N`), found or created
+  first. Security vulnerabilities use a private security advisory, never
+  a public issue (see SECURITY.md).
+- Every branch ends in a PR into `develop` (`main` is release-only),
+  with `Closes #N` for the issues it resolves.
+
 ## Database migration rules
 
 MongoDB via Prisma has **no migration history** — `db:migrate` runs
