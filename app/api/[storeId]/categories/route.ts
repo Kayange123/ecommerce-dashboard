@@ -2,6 +2,9 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+import { checkCategoryReferences } from "@/lib/store-references";
+import { categoryBodySchema, parseBody } from "@/lib/validation";
+
 export async function POST(
   req: Request,
   props: { params: Promise<{ storeId: string }> }
@@ -9,13 +12,12 @@ export async function POST(
   const params = await props.params;
   try {
     const { userId } = await auth();
-    const body = await req.json();
-    const { name, billboardId } = body;
-
     if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
-    if (!name) return new NextResponse("Name is required", { status: 400 });
-    if (!billboardId)
-      return new NextResponse("Billboard ID is required", { status: 400 });
+
+    const parsed = await parseBody(req, categoryBodySchema);
+    if (!parsed.success) return new NextResponse(parsed.error, { status: 400 });
+    const { name, billboardId } = parsed.data;
+
     if (!params.storeId)
       return new NextResponse("Store ID is required", { status: 400 });
 
@@ -27,6 +29,13 @@ export async function POST(
     });
     if (!storeByUserId)
       return new NextResponse("Unauthorized", { status: 403 });
+
+    const referenceError = await checkCategoryReferences(
+      params.storeId,
+      billboardId
+    );
+    if (referenceError)
+      return new NextResponse(referenceError, { status: 400 });
 
     const category = await prismadb.category.create({
       data: {
