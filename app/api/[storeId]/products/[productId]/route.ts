@@ -2,6 +2,9 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+import { checkProductReferences } from "@/lib/store-references";
+import { parseBody, productBodySchema } from "@/lib/validation";
+
 export async function PATCH(
   req: Request,
   props: { params: Promise<{ storeId: string; productId: string }> }
@@ -9,23 +12,15 @@ export async function PATCH(
   const params = await props.params;
   try {
     const { userId } = await auth();
-    const body = await req.json();
-    const { name, price, images, isFeatured, isArchived, categoryId, sizeId } =
-      body;
-
     if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
-    if (!name) return new NextResponse("name is required", { status: 400 });
-    if (!price) return new NextResponse("price is required", { status: 400 });
-    if (!categoryId)
-      return new NextResponse("category is required", { status: 400 });
-    if (!sizeId) return new NextResponse("sizeId is required", { status: 400 });
+
+    const parsed = await parseBody(req, productBodySchema);
+    if (!parsed.success) return new NextResponse(parsed.error, { status: 400 });
+    const { name, price, images, isFeatured, isArchived, categoryId, sizeId } =
+      parsed.data;
+
     if (!params.storeId)
       return new NextResponse("Store ID is required", { status: 400 });
-    if (!images || !images.length) {
-      return new NextResponse("At least one image is required", {
-        status: 400,
-      });
-    }
 
     const storeByUserId = await prismadb.store.findFirst({
       where: {
@@ -44,6 +39,14 @@ export async function PATCH(
     });
     if (!productByStoreId)
       return new NextResponse("Not Found", { status: 404 });
+
+    const referenceError = await checkProductReferences(
+      params.storeId,
+      categoryId,
+      sizeId
+    );
+    if (referenceError)
+      return new NextResponse(referenceError, { status: 400 });
 
     await prismadb.product.update({
       where: {
@@ -69,7 +72,7 @@ export async function PATCH(
       data: {
         images: {
           createMany: {
-            data: [...images.map((image: { url: string }) => image)],
+            data: images,
           },
         },
       },
