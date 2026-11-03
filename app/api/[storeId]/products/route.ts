@@ -2,6 +2,9 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+import { checkProductReferences } from "@/lib/store-references";
+import { parseBody, productBodySchema } from "@/lib/validation";
+
 export async function POST(
   req: Request,
   props: { params: Promise<{ storeId: string }> }
@@ -9,23 +12,15 @@ export async function POST(
   const params = await props.params;
   try {
     const { userId } = await auth();
-    const body = await req.json();
-    const { name, price, images, isFeatured, isArchived, categoryId, sizeId } =
-      body;
-
     if (!userId) return new NextResponse("Unauthenticated", { status: 401 });
-    if (!name) return new NextResponse("name is required", { status: 400 });
-    if (!price) return new NextResponse("price is required", { status: 400 });
-    if (!categoryId)
-      return new NextResponse("category is required", { status: 400 });
-    if (!sizeId) return new NextResponse("sizeId is required", { status: 400 });
+
+    const parsed = await parseBody(req, productBodySchema);
+    if (!parsed.success) return new NextResponse(parsed.error, { status: 400 });
+    const { name, price, images, isFeatured, isArchived, categoryId, sizeId } =
+      parsed.data;
+
     if (!params.storeId)
       return new NextResponse("Store ID is required", { status: 400 });
-    if (!images || !images.length) {
-      return new NextResponse("At least one image is required", {
-        status: 400,
-      });
-    }
     const storeByUserId = await prismadb.store.findFirst({
       where: {
         id: params.storeId,
@@ -34,6 +29,14 @@ export async function POST(
     });
     if (!storeByUserId)
       return new NextResponse("Unauthorized", { status: 403 });
+
+    const referenceError = await checkProductReferences(
+      params.storeId,
+      categoryId,
+      sizeId
+    );
+    if (referenceError)
+      return new NextResponse(referenceError, { status: 400 });
 
     const product = await prismadb.product.create({
       data: {
@@ -46,7 +49,7 @@ export async function POST(
         storeId: params.storeId,
         images: {
           createMany: {
-            data: [...images.map((image: { url: string }) => image)],
+            data: images,
           },
         },
       },

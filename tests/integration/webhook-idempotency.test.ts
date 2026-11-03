@@ -137,4 +137,25 @@ describe("webhook idempotency", () => {
     const res = await POST(webhookRequest());
     expect(res.status).toBe(400);
   });
+
+  it.each([
+    ["no order id in its metadata", {}],
+    ["an order id that doesn't exist", { orderId: "order-missing" }],
+  ])(
+    "acknowledges a session with %s instead of erroring into a retry loop",
+    async (_label, metadata) => {
+      fakeStripe.webhooks.constructEvent.mockReturnValue({
+        ...EVENT,
+        data: { object: { ...EVENT.data.object, metadata } },
+      });
+
+      const res = await POST(webhookRequest());
+
+      expect(res.status).toBe(200);
+      const order = await fakeDb.order.findFirst({ where: { id: "order-1" } });
+      expect(order.isPaid).toBe(false);
+      const products = await fakeDb.product.findMany();
+      expect(products.every((p: any) => p.isArchived === false)).toBe(true);
+    }
+  );
 });

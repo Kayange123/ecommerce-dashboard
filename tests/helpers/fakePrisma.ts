@@ -22,6 +22,17 @@ function matchesValue(actual: unknown, expected: unknown): boolean {
         actual.startsWith(ops.startsWith as string)
       );
     }
+    const rangeOps = ["gte", "gt", "lte", "lt"].filter((op) => op in ops);
+    if (rangeOps.length > 0 && rangeOps.length === Object.keys(ops).length) {
+      const value = actual as number | Date;
+      return rangeOps.every((op) => {
+        const bound = ops[op] as number | Date;
+        if (op === "gte") return value >= bound;
+        if (op === "gt") return value > bound;
+        if (op === "lte") return value <= bound;
+        return value < bound;
+      });
+    }
     // Unsupported operator — fail loudly rather than silently matching
     // everything, so a missing case here is caught by a failing test
     // instead of a false positive.
