@@ -39,7 +39,7 @@
     "@types/node": "26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "autoprefixer": "10.6.1",
+    "autoprefixer": "10.6.2",
     "axios": "^1.21.0",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.11.0",
