@@ -103,6 +103,13 @@ client"` directive, so Recharts couldn't render inside the server
 
 ### Changed
 
+- Bumped `next-cloudinary` 6.19.3 → 7.0.0 (Dependabot #92). v7 removes
+  the deprecated `onUpload` prop of `CldUploadWidget`, so
+  `components/ui/ImageUpload.tsx` now uses `onSuccess`. Unlike
+  `onUpload`, `onSuccess` is called with the props from when the widget
+  was created, so `ProductForm` now appends each upload to
+  `form.getValues("images")` instead of the `field.value` from that
+  render; otherwise each new upload replaced the earlier ones.
 - Bumped `cloudinary` 1.40.0 → 2.11.0 (Dependabot #38). Verified the
   app only imports `next-cloudinary`'s `CldUploadWidget`
   (`components/ui/ImageUpload.tsx`) — the `cloudinary` SDK package

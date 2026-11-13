@@ -165,7 +165,7 @@ const ProductForm = ({
                     values={field.value?.map((image) => image.url)}
                     disabled={isLoading}
                     onChange={(url) =>
-                      field.onChange([...field.value, { url }])
+                      field.onChange([...form.getValues("images"), { url }])
                     }
                     onRemove={(url) =>
                       field.onChange([
