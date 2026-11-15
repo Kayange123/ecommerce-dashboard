@@ -66,6 +66,16 @@ client"` directive, so Recharts couldn't render inside the server
 
 ### Security
 
+- Fixed cross-store _references_ in the products and categories APIs:
+  create/update verified the caller owned the store and the record being
+  changed, but accepted any `categoryId`/`sizeId` (products) or
+  `billboardId` (categories), so a store could be linked to another
+  store's records. These ids are now checked against the store in the
+  URL (`lib/store-references.ts`), with cross-store negative tests.
+- Product, category, and checkout request bodies are now validated
+  server-side with zod (`lib/validation.ts`): non-positive or non-numeric
+  prices, malformed JSON, and a non-array `productIds` now return `400`
+  instead of being stored or surfacing as `500`.
 - Fixed a cross-store authorization (IDOR) vulnerability in the billboards,
   categories, sizes, and products APIs: `PATCH`/`DELETE` handlers verified
   the caller owned _some_ store but did not verify the target resource
@@ -294,6 +304,19 @@ npm ci` against the merged result failed with ERESOLVE:
 
 ### Fixed
 
+- Checkout sent Stripe `price * 100` as a float (`19.99` →
+  `1998.9999999999998`), which Stripe rejects as a non-integer amount;
+  it's now rounded to whole minor units.
+- Checkout no longer accepts archived (already sold) products.
+- The Stripe webhook now acknowledges a `checkout.session.completed`
+  event with no matching order with `200` instead of throwing a `500`
+  that Stripe would retry indefinitely.
+- The dashboard revenue chart summed the same month across every year
+  (January 2025 + January 2026 in one bar); it now covers the current
+  calendar year only.
+- The orders page silently showed only the 20 most recent orders with
+  no way to reach older ones; it now loads all of the store's orders
+  into the table's existing pagination.
 - Removed a copy-pasted "Billboard ID is required" error string from the
   product delete handler.
 - Removed the duplicate, unused `tailwind.config.ts` stub — `tailwind.config.js`

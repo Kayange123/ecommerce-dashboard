@@ -46,11 +46,19 @@ export const getStockSize = async (storeId: string) => {
     },
   });
 };
+// The chart is labelled Jan–Dec with no year, so it covers the current
+// calendar year only — bucketing by month alone across all time would add
+// e.g. January 2025 and January 2026 into one bar.
 export const getGraphRevenue = async (storeId: string) => {
+  const year = new Date().getFullYear();
   const orders = await prismadb.order.findMany({
     where: {
       storeId,
       isPaid: true,
+      createdAt: {
+        gte: new Date(year, 0, 1),
+        lt: new Date(year + 1, 0, 1),
+      },
     },
     include: {
       orderItems: {

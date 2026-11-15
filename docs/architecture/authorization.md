@@ -3,13 +3,20 @@
 ## The model
 
 A `Store` has exactly one owning `userId` (a Clerk user id). Every
-mutating route must prove two things, not one:
+mutating route must prove these, not just the first:
 
 1. **The caller owns _a_ store matching the `storeId` in the URL** —
    `prismadb.store.findFirst({ where: { id: params.storeId, userId } })`.
 2. **The specific resource being mutated belongs to _that same_ store** —
    the `storeId` on the target billboard/category/size/product row must
    match `params.storeId` too.
+
+3. **Any other record the body points at belongs to that store too** —
+   a product's `categoryId`/`sizeId` and a category's `billboardId`.
+   Without this, a store owner can pass steps 1 and 2 on their own record
+   while attaching another store's category, size, or billboard to it.
+   These checks live in `lib/store-references.ts`, which every route
+   taking such an id uses.
 
 Step 1 alone is not sufficient. A user who owns Store A legitimately
 passes step 1 for any request shaped `.../api/{store-A-id}/products/{any-product-id}`

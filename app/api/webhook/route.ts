@@ -42,9 +42,23 @@ export async function POST(req: Request) {
       return new NextResponse("Event already processed", { status: 200 });
     }
 
+    // A session without one of our order ids (e.g. a Payment Link or
+    // another integration on the same Stripe account) can never be
+    // processed here. Acknowledge it with a 2xx — Stripe retries any
+    // non-2xx response, so erroring would just make it redeliver forever.
+    const orderId = session?.metadata?.orderId;
+    const existingOrder = orderId
+      ? await prismadb.order.findFirst({ where: { id: orderId } })
+      : null;
+    if (!existingOrder) {
+      return new NextResponse("No matching order; event ignored", {
+        status: 200,
+      });
+    }
+
     const order = await prismadb.order.update({
       where: {
-        id: session?.metadata?.orderId,
+        id: existingOrder.id,
       },
       data: {
         isPaid: true,

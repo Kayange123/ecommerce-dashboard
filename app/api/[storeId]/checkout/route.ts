@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import prismadb from "@/lib/prismadb";
 import { stripe } from "@/lib/stripe";
+import { checkoutBodySchema, parseBody } from "@/lib/validation";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*", // allow requests from any other domain
@@ -18,11 +19,11 @@ export async function POST(
   props: { params: Promise<{ storeId: string }> }
 ) {
   const params = await props.params;
-  const { productIds } = await req.json();
-
-  if (!productIds || productIds.length === 0) {
-    return new NextResponse("ProductIds are required", { status: 400 });
+  const parsed = await parseBody(req, checkoutBodySchema);
+  if (!parsed.success) {
+    return new NextResponse(parsed.error, { status: 400 });
   }
+  const { productIds } = parsed.data;
 
   const products = await prismadb.product.findMany({
     where: {
@@ -30,6 +31,10 @@ export async function POST(
         in: productIds,
       },
       storeId: params.storeId,
+      // Archived products are no longer for sale (today, purchase archives
+      // a product — see app/api/webhook/route.ts), so a stale cart
+      // mustn't be able to buy one again.
+      isArchived: false,
     },
     include: {
       images: true,
@@ -38,7 +43,7 @@ export async function POST(
 
   if (products.length !== new Set(productIds).size) {
     return new NextResponse(
-      "One or more products do not belong to this store",
+      "One or more products are unavailable in this store",
       { status: 400 }
     );
   }
@@ -53,7 +58,9 @@ export async function POST(
           name: item.name,
           images: item.images.map((image) => image.url),
         },
-        unit_amount: Number(item.price) * 100,
+        // Stripe requires an integer amount in minor units; float math
+        // alone turns e.g. 19.99 into 1998.9999999999998.
+        unit_amount: Math.round(item.price * 100),
       },
       adjustable_quantity: {
         enabled: true,
